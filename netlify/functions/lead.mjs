@@ -54,14 +54,16 @@ export default async (req) => {
   }
 
   // 3) notify Bev by email for the submissions she'd want to see right away
-  // (contact, feedback, numerology report requests — NOT newsletter/opt-in captures)
+  // (contact, feedback, appointment requests, numerology report requests — NOT newsletter/opt-in captures)
   let notified = "skipped";
   const NOTIFY_TO = process.env.NOTIFY_EMAIL;
-  const wantsNotify = source === "contact" || source === "feedback" || source.startsWith("report:");
+  const wantsNotify = source === "contact" || source === "feedback" || source === "appointment" || source.startsWith("report:");
   if (KEY && NOTIFY_TO && wantsNotify) {
     try {
       const label = source.startsWith("report:") ? `Report request — ${source.slice(7)}`
-        : source === "feedback" ? "New feedback" : "New contact form message";
+        : source === "feedback" ? "New feedback"
+        : source === "appointment" ? "New appointment request"
+        : "New contact form message";
       const r = await fetch("https://api.brevo.com/v3/smtp/email", {
         method: "POST",
         headers: { "api-key": KEY, "content-type": "application/json", accept: "application/json" },
