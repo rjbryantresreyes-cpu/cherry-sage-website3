@@ -1,0 +1,38 @@
+backend:
+  name: test-repo
+
+# Demo mode: this preview does not save to a real site yet. It shows the
+# exact editor Bev would use. Real login + publish gets wired in the next step.
+
+site_url: https://cherry-sage-website3.netlify.app
+display_url: https://cherry-sage-website3.netlify.app
+logo_url: https://cherry-sage-website3.netlify.app/assets/logo-horizontal.png
+
+media_folder: "assets/uploads"
+public_folder: "/assets/uploads"
+
+collections:
+  - name: "articles"
+    label: "Guest Articles"
+    label_singular: "Guest Article"
+    description: "Add a new guest article, or edit an existing one. Fill in the fields, then click Publish."
+    folder: "content/articles"
+    create: true
+    slug: "{{slug}}"
+    summary: "{{title}}"
+    fields:
+      - { label: "Title", name: "title", widget: "string", hint: "The article's headline." }
+      - { label: "Category", name: "category", widget: "select", options: ["Business & Spirituality", "Metaphysics", "Psychic Medium", "Psychic & Paranormal", "Reincarnation"], hint: "Pick the topic this article belongs to." }
+      - { label: "Author (optional)", name: "author", widget: "string", required: false, hint: "The guest author's name, if there is one." }
+      - { label: "Featured image", name: "image", widget: "image", required: false, hint: "Drag an image in, or click to upload one." }
+      - { label: "Article", name: "body", widget: "markdown", hint: "The full article text. Use the toolbar for bold, headings, links." }
+
+  - name: "categories"
+    label: "Categories"
+    label_singular: "Category"
+    description: "Your list of article topics. Add a new one here any time."
+    folder: "content/categories"
+    create: true
+    identifier_field: "name"
+    fields:
+      - { label: "Category name", name: "name", widget: "string", hint: "e.g. Meditation, Numerology, Dreams." }

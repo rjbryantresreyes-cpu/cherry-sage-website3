@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Moderate Comments — Cherry Sage</title>
+<meta name="description" content="Private comment moderation for Cherry Sage.">
+<link rel="canonical" href="https://cherrysage.com/moderate-comments.html">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#6E1A28">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500;1,600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site.css?v=33">
+<link rel="icon" href="assets/favicon.ico?v=2" sizes="any">
+<link rel="icon" href="assets/icon-32.png?v=2" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="assets/icon-180.png?v=2">
+<style>.mc-item{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--r);padding:1.1rem 1.3rem;margin-bottom:1rem}.mc-head{display:flex;justify-content:space-between;gap:1rem;font-size:.85rem;color:var(--ink-soft);margin-bottom:.4rem}.mc-post{font-weight:600;color:var(--oxblood)}.mc-actions{display:flex;gap:.6rem;margin-top:.8rem}.mc-actions button{padding:.5rem 1.1rem;border-radius:10px;border:0;cursor:pointer;font-weight:600}.mc-approve{background:var(--sage,#5c7a5c);color:#fff}.mc-reject{background:var(--line-strong);color:var(--ink)}</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap nav-row">
+    <a aria-label='Cherry Sage home' class='brand' href='/'><img src="assets/logo-horizontal.png" alt="Cherry Sage — Psychic, Tarot, Numerology"></a>
+    <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false">&#9776;</button>
+    <nav class="primary-nav" id="primaryNav" aria-label="Primary">
+      <ul><li><a href='/meet'>About</a></li><li><a href='/psychic-reading'>Psychic</a></li><li><a href='/tarot'>Tarot</a></li><li><a href='/numerology'>Numerology</a></li><li><a href='/free-karmic-reading'>Free Numerology</a></li><li><a href='/shop'>Shop</a></li><li class="has-dropdown"><a href="/testimonials">Testimonials</a><ul class="dropdown"><li><a href="/feedback">Leave Feedback</a></li></ul></li><li><a href='/blog'>Blog</a></li><li><a href='/articles'>Guest Articles</a></li><li><a href='/contact'>Contact</a></li><li><a href='/account'>My Account</a></li></ul>
+      <a class='btn btn-primary' href='/shop'>Buy Minutes</a>
+    </nav>
+  </div>
+</header>
+<main>
+<section class="page-hero banner"><div class="ph-glow" aria-hidden="true"></div><div class="ph-stars" aria-hidden="true"></div><div class="wrap reveal"><p class="eyebrow">Cherry only &middot; private</p><h1>Moderate comments</h1><p class="lede">New comments from blog posts and guest articles wait here until you approve or reject them.</p></div></section>
+<section class="section"><div class="wrap" style="max-width:720px">
+  <div class="card reveal" style="text-align:left;margin-bottom:1.6rem">
+    <label style="display:grid;gap:.3rem">Your access key
+      <input id="adminKey" type="password" placeholder="Enter your key" style="padding:.7rem 1rem;border:1px solid var(--line-strong);border-radius:10px">
+    </label>
+    <button id="loadBtn" class="btn btn-primary" style="margin-top:.9rem">Load pending comments</button>
+  </div>
+  <div id="mcList"></div>
+</div></section>
+<script>
+(function(){
+  var key='';
+  function esc(s){return String(s||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function render(items){
+    var list=document.getElementById('mcList');
+    if(!items.length){ list.innerHTML='<p style="color:var(--ink-soft)">No comments waiting right now.</p>'; return; }
+    list.innerHTML=items.map(function(c){
+      var when=new Date(c.ts).toLocaleString();
+      return '<div class="mc-item" data-id="'+esc(c.id)+'"><div class="mc-head"><span class="mc-post">'+esc(c.postTitle)+'</span><span>'+when+'</span></div>'+
+        '<div>'+esc(c.name||'Anonymous')+(c.email?' &lt;'+esc(c.email)+'&gt;':'')+'</div>'+
+        '<p style="margin:.5rem 0 0">'+esc(c.message).replace(/\n/g,'<br>')+'</p>'+
+        '<div class="mc-actions"><button class="mc-approve" data-action="approve">Approve</button><button class="mc-reject" data-action="reject">Reject</button></div></div>';
+    }).join('');
+  }
+  function load(){
+    key=document.getElementById('adminKey').value.trim();
+    if(!key){ alert('Enter your access key first.'); return; }
+    fetch('/.netlify/functions/comments?admin=1&key='+encodeURIComponent(key))
+      .then(function(r){ if(r.status===401){ alert('That key was not accepted.'); return null; } return r.json(); })
+      .then(function(d){ if(d) render(d.pending||[]); });
+  }
+  document.getElementById('loadBtn').addEventListener('click', load);
+  document.getElementById('mcList').addEventListener('click', function(e){
+    var btn=e.target.closest('button[data-action]'); if(!btn) return;
+    var item=btn.closest('.mc-item'), id=item.getAttribute('data-id'), action=btn.getAttribute('data-action');
+    btn.disabled=true;
+    fetch('/.netlify/functions/comments',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:key,id:id,action:action})})
+      .then(function(r){return r.json();}).then(function(res){ if(res.ok) item.remove(); else { alert('Could not update — try reloading.'); btn.disabled=false; } });
+  });
+})();
+</script><section class="section section-dark cta" id="book"><div class="wrap reveal"><h2>Ready for clarity?</h2><p>Your first step is a quiet one. Book your reading and let the answers you're seeking find their way to you.</p><a class='btn btn-gold' href='/shop'>Buy Minutes Now</a></div></section>
+</main>
+<footer class="footer">
+  <div class="wrap footer-grid">
+    <div>
+      <div class="footer-brand"><img src="assets/mark-clean.png" alt=""><span>Cherry Sage</span></div>
+      <p style="font-size:.9rem">Honest, accurate psychic, tarot, and numerology readings by phone. Trusted since 1999.</p>
+    </div>
+    <div><h4>Readings</h4><ul><li><a href='/psychic-reading'>Psychic Reading</a></li><li><a href='/tarot'>Tarot Card Reading</a></li><li><a href='/numerology'>Numerology</a></li><li><a href='/how-it-works'>How It Works</a></li></ul></div>
+    <div><h4>Explore</h4><ul><li><a href='/meet'>Meet Cherry</a></li><li><a href='/blog'>Blog</a></li><li><a href='/articles'>Guest Articles</a></li><li><a href='/testimonials'>Testimonials</a></li><li><a href='/policies'>Policies</a></li></ul></div>
+    <div><h4>Free</h4><ul><li><a href='/tarot-pull'>Free Tarot Pull</a></li><li><a href='/tarot-spread'>Free Tarot Spread</a></li><li><a href='/life-path'>Life Path Calculator</a></li><li><a href='/free-karmic-reading'>Karmic Accumulation</a></li><li><a href='/horoscope'>Daily Horoscope</a></li><li><a href='/feedback'>Leave Feedback</a></li></ul></div>
+  </div>
+  <div class="wrap footer-signup"><h4>Cherry's Newsletter</h4><p class="nl-lede">Honest insight on the psychic path, numerology, and tarot, straight to your inbox. No spam, unsubscribe any time.</p><form class="nl-form" novalidate><input type="email" placeholder="Your email" aria-label="Your email address" required><button type="submit">Subscribe</button></form><p class="nl-note" aria-live="polite"></p></div>
+  <div class="wrap footer-bottom">© Cherry Sage. Serving clients worldwide since 1999. · Site by Balay ni Bruno &amp; Co.</div>
+</footer>
+<div class="chat-widget" id="chatWidget" role="button" tabindex="0" aria-label="Chat with Ivy, Cherry's assistant — click to open">
+  <span class="cw-hint" id="cwHint">Click to chat with Ivy</span>
+  <span class="cw-status"><span class="status-dot"></span>Cherry is Online</span>
+  <span class="cw-bubble"><img src="assets/mark-clean.png" alt=""></span>
+</div>
+<script src="app.js?v=7"></script>
+<script src="embers.js?v=4"></script>
+<script src="magic.js?v=2"></script>
+<script src="funnel.js?v=6"></script>
+<script src="chat.js?v=7"></script>
+<script src="status.js?v=1"></script>
+</body>
+</html>

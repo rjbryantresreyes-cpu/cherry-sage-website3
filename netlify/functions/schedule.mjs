@@ -1,0 +1,41 @@
+// Cherry Sage — availability schedule. GET returns the schedule; POST (with admin key) saves it.
+// The site's status pill + chat widget compute "online / away / offline" from this, live.
+import { getStore } from "@netlify/blobs";
+
+const DEFAULT = {
+  tz: "America/New_York",
+  // 0=Sun ... 6=Sat. null = closed that day. [openHour, closeHour] in 24h local time.
+  hours: { 0:null, 1:[9,21], 2:[9,21], 3:[9,21], 4:[9,21], 5:[9,21], 6:[10,18] },
+  always: true,          // while true, always "online" (her current 24h mode) until she sets hours
+  holidays: [],          // ["2026-12-25", ...] -> away those days
+  away: false            // manual vacation toggle -> away
+};
+
+export default async (req) => {
+  const store = () => getStore("schedule");
+  if (req.method === "GET") {
+    let s = DEFAULT;
+    try { const v = await store().get("current", { type: "json" }); if (v) s = v; } catch {}
+    return json(s);
+  }
+  if (req.method === "POST") {
+    const KEY = process.env.STATUS_ADMIN_KEY;
+    let d = {};
+    try { d = await req.json(); } catch { return json({ error: "bad body" }, 400); }
+    if (!KEY || d.key !== KEY) return json({ error: "unauthorized" }, 401);
+    const s = {
+      tz: String(d.tz || DEFAULT.tz),
+      hours: d.hours && typeof d.hours === "object" ? d.hours : DEFAULT.hours,
+      always: !!d.always,
+      holidays: Array.isArray(d.holidays) ? d.holidays.slice(0, 60) : [],
+      away: !!d.away
+    };
+    try { await store().setJSON("current", s); } catch (e) { return json({ error: "save failed" }, 500); }
+    return json({ ok: true, schedule: s });
+  }
+  return json({ error: "method" }, 405);
+};
+
+function json(o, status = 200) {
+  return new Response(JSON.stringify(o), { status, headers: { "content-type": "application/json", "cache-control": "no-store", "access-control-allow-origin": "*" } });
+}
