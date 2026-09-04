@@ -1,0 +1,11 @@
+{"level":30,"time":"2026-09-04T21:14:57.641Z","pid":43576,"hostname":"Bruno","msg":"Starting WhatsApp MCP Server..."}
+{"level":30,"time":"2026-09-04T21:14:57.641Z","pid":43576,"hostname":"Bruno","msg":"Initializing database..."}
+{"level":30,"time":"2026-09-04T21:14:57.644Z","pid":43576,"hostname":"Bruno","msg":"Database initialized successfully."}
+{"level":30,"time":"2026-09-04T21:14:57.644Z","pid":43576,"hostname":"Bruno","msg":"Starting MCP server..."}
+{"level":30,"time":"2026-09-04T21:14:57.645Z","pid":43576,"hostname":"Bruno","msg":"Initializing MCP server..."}
+{"level":30,"time":"2026-09-04T21:14:57.647Z","pid":43576,"hostname":"Bruno","msg":"MCP server configured. Connecting stdio transport..."}
+{"level":30,"time":"2026-09-04T21:14:57.648Z","pid":43576,"hostname":"Bruno","msg":"MCP transport connected. Server is ready and listening via stdio."}
+{"level":30,"time":"2026-09-04T21:14:57.648Z","pid":43576,"hostname":"Bruno","msg":"MCP Server setup complete. Waiting for requests from client..."}
+{"level":30,"time":"2026-09-04T21:14:57.648Z","pid":43576,"hostname":"Bruno","msg":"MCP Server started and listening."}
+{"level":30,"time":"2026-09-04T21:14:57.648Z","pid":43576,"hostname":"Bruno","msg":"MCP server is READ-ONLY for WhatsApp (the standalone collector owns the socket). Sends are queued to the DB outbox."}
+{"level":30,"time":"2026-09-04T21:14:57.648Z","pid":43576,"hostname":"Bruno","msg":"Application setup complete. Running..."}

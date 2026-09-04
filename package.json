@@ -2,7 +2,11 @@
   "name": "cherry-sage-site",
   "private": true,
   "type": "module",
+  "scripts": {
+    "build": "node scripts/build-articles.js"
+  },
   "dependencies": {
-    "@netlify/blobs": "^8.2.0"
+    "@netlify/blobs": "^8.2.0",
+    "marked": "^18.0.11"
   }
 }
