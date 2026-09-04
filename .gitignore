@@ -1,2 +1,20 @@
 # Local Netlify folder
 .netlify
+.nfhome
+
+# Dependencies (Netlify installs these at build time from package.json)
+node_modules
+
+# Python cache
+__pycache__
+
+# Local scratch / one-off screenshots and dumps (not part of the live site)
+_chk_*.png
+_v_*.png
+_final_home.png
+_home_preview.json
+_home_testi.json
+_live_*.png
+_site.zip
+.impeccable
+
