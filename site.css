@@ -669,16 +669,17 @@ main section>.wrap,.hero>.wrap,.page-hero>.wrap,.draw-section>.wrap{position:rel
 /* ============ 2026-08-28: tarot deck — shuffle, fan, pick, reveal ============ */
 .t-qlabel{display:grid;gap:.5rem;font-size:.95rem;color:var(--ink-soft);margin-bottom:1.2rem;text-align:left}
 .t-prompt{color:var(--ink-soft);margin-bottom:2rem;font-size:1.05rem}
-.t-spread{position:relative;height:290px;display:flex;justify-content:center;align-items:flex-start;margin:0 auto;max-width:640px}
-.t-card-back{position:absolute;top:40px;width:78px;height:128px;border-radius:11px;cursor:pointer;
+.t-spread-scroll{overflow-x:auto;overflow-y:visible;padding:12px 0 28px;-webkit-overflow-scrolling:touch}
+.t-spread{position:relative;height:290px;flex-shrink:0;margin:0 auto;width:calc(var(--n,1) * 30px + 78px)}
+.t-card-back{position:absolute;top:40px;left:50%;margin-left:-39px;width:78px;height:128px;border-radius:11px;cursor:pointer;
   background:radial-gradient(circle at 40% 30%,#7c2233,var(--oxblood) 55%,var(--oxblood-deep));
   border:1px solid var(--gold-soft);box-shadow:0 10px 26px -12px rgba(74,15,25,.55);
   display:flex;align-items:center;justify-content:center;color:var(--gold-bright);font-size:1.3rem;
   transform-origin:center center;transition:transform .55s cubic-bezier(.2,.8,.2,1),opacity .35s,filter .2s;
   transform:translateX(0) rotate(0);opacity:0}
 .t-spread.shuffling .t-card-back{animation:tShuffle .7s ease}
-.t-spread.fanned .t-card-back{opacity:1;transform:translateX(calc((var(--i) - (var(--n) - 1)/2) * 25px)) rotate(calc((var(--i) - (var(--n) - 1)/2) * 1.2deg))}
-.t-spread.fanned .t-card-back:hover{filter:brightness(1.18);z-index:6;transform:translateX(calc((var(--i) - (var(--n) - 1)/2) * 25px)) translateY(-16px) rotate(calc((var(--i) - (var(--n) - 1)/2) * 1.2deg))}
+.t-spread.fanned .t-card-back{opacity:1;transform:translateX(calc((var(--i) - (var(--n) - 1)/2) * 30px)) rotate(calc((var(--i) - (var(--n) - 1)/2) * 1.2deg))}
+.t-spread.fanned .t-card-back:hover{filter:brightness(1.18);z-index:6;transform:translateX(calc((var(--i) - (var(--n) - 1)/2) * 30px)) translateY(-16px) rotate(calc((var(--i) - (var(--n) - 1)/2) * 1.2deg))}
 .t-card-back.chosen{z-index:20;filter:brightness(1.2)}
 .t-card-back.dim{opacity:.28;filter:grayscale(.4)}
 /* horizontal shuffle — cards riffle left↔right, then spread across in a horizontal line */
@@ -696,9 +697,9 @@ main section>.wrap,.hero>.wrap,.page-hero>.wrap,.draw-section>.wrap{position:rel
 .pull-refl{font-size:1.08rem;line-height:1.6;color:var(--ink);max-width:52ch;margin:0 auto 1rem}
 .t-forreflection{font-size:.85rem;color:var(--ink-soft);max-width:46ch;margin:0 auto 1.4rem}
 .t-actions{display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap}
-@media(max-width:560px){.t-card-back{width:60px;height:98px;transform-origin:center center}.t-spread{height:240px}
-  .t-spread.fanned .t-card-back{transform:translateX(calc((var(--i) - (var(--n) - 1)/2) * 14px)) rotate(calc((var(--i) - (var(--n) - 1)/2) * 1deg))}
-  .t-spread.fanned .t-card-back:hover{transform:translateX(calc((var(--i) - (var(--n) - 1)/2) * 14px)) translateY(-12px) rotate(calc((var(--i) - (var(--n) - 1)/2) * 1deg))}}
+@media(max-width:560px){.t-card-back{width:60px;height:98px;margin-left:-30px;transform-origin:center center}.t-spread{height:240px;width:calc(var(--n,1) * 18px + 60px)}
+  .t-spread.fanned .t-card-back{transform:translateX(calc((var(--i) - (var(--n) - 1)/2) * 18px)) rotate(calc((var(--i) - (var(--n) - 1)/2) * 1deg))}
+  .t-spread.fanned .t-card-back:hover{transform:translateX(calc((var(--i) - (var(--n) - 1)/2) * 18px)) translateY(-12px) rotate(calc((var(--i) - (var(--n) - 1)/2) * 1deg))}}
 
 /* ============ 2026-08-31: mobile home hero fix — photo orb was collapsing (0x0) + hidden ============ */
 .hero-art{opacity:1 !important;transform:none !important}
