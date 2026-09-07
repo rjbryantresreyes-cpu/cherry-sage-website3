@@ -82,7 +82,10 @@
     {n:"King of Pentacles",g:"◈",k:"Pentacles · quiet abundance",r:"What you've built is more solid than you give it credit for.",p:"You've earned this stability through real work. Trust it, and use it to help others when you can."}
   ];
   var HEAVY=/(suicide|kill myself|self.?harm|dying|death of|cancer|diagnos|pregnan|lawsuit|court|custody|medical|overdose)/i;
-  var SPREAD=DECK.length; // the whole deck shuffles and fans out
+  // All 78 cards are in play for the actual draw (pick() below always chooses randomly
+  // from the full DECK). The fan only ever shows a smaller number of card-backs at once —
+  // fanning all 78 individually made the spread absurdly wide and over-rotated.
+  var SPREAD=Math.min(DECK.length,22);
 
   // Support multiple copies of this widget on one page (e.g. homepage + its own page),
   // each scoped by a data-scope attribute on a wrapping element, falling back to the
@@ -111,6 +114,8 @@
         var c=document.createElement('button');
         c.className='t-card-back'; c.type='button'; c.setAttribute('aria-label','Pick this card');
         c.style.setProperty('--i',i); c.style.setProperty('--n',SPREAD);
+        c.style.setProperty('--d',Math.abs(i-(SPREAD-1)/2));
+        c.style.setProperty('--shuffleDir',i%2===0?1:-1);
         c.innerHTML='<span>✦</span>';
         c.addEventListener('click',pick);
         spread.appendChild(c);
@@ -121,7 +126,7 @@
         if(scroller&&scroller.classList.contains('t-spread-scroll')){
           scroller.scrollLeft=(scroller.scrollWidth-scroller.clientWidth)/2;
         }
-      },700);
+      },950);
     }
 
     // Deck is visible and shuffleable right away, no question required for this part.
