@@ -108,7 +108,8 @@
     // riding a shallow arc. Clicking "Pick a card" ramps the drift slow->fast, then eases
     // it down to a stop before the reveal — the button replaces clicking an individual card.
     var GAP=16, cardEls=[], offset=0, velocity=0, IDLE_V=22, PEAK_V=640;
-    var phase='idle', phaseStart=0, raf=null, lastTs=null;
+    var ACCEL_MS=1100, DECEL_MS=1000;
+    var phase='idle', phaseStart=0, raf=null, lastTs=null, revealed=false;
 
     function buildTicker(){
       result.hidden=true;
@@ -122,7 +123,7 @@
         spread.appendChild(c);
         cardEls.push(c);
       }
-      offset=0; lastTs=null; phase='idle'; phaseStart=0;
+      offset=0; lastTs=null; phase='idle'; phaseStart=0; revealed=false;
       layout();
       if(!raf) raf=requestAnimationFrame(tick);
     }
@@ -134,21 +135,21 @@
       var dt=Math.min(.05,(ts-lastTs)/1000); lastTs=ts;
       var elapsed=ts-phaseStart;
       if(phase==='accelerating'){
-        var t=Math.min(1,elapsed/1100);
+        var t=Math.min(1,elapsed/ACCEL_MS);
         velocity=IDLE_V+(PEAK_V-IDLE_V)*(t*t);
-        if(t>=1){ phase='decelerating'; phaseStart=ts; }
       }else if(phase==='decelerating'){
-        var t2=Math.min(1,elapsed/1000);
+        var t2=Math.min(1,elapsed/DECEL_MS);
         var eased=1-Math.pow(1-t2,3);
         velocity=PEAK_V*(1-eased);
-        if(t2>=1){ velocity=0; phase='stopped'; }
       }else if(phase==='idle'){
         velocity=IDLE_V;
+      }else{
+        velocity=0;
       }
       offset+=velocity*dt;
       layout();
       if(phase!=='stopped'){ raf=requestAnimationFrame(tick); }
-      else{ raf=null; onSpinStopped(); }
+      else{ raf=null; }
     }
 
     function layout(){
@@ -184,9 +185,16 @@
       pickBtn.disabled=true;
       phase='accelerating'; phaseStart=performance.now(); lastTs=null;
       if(!raf) raf=requestAnimationFrame(tick);
+      // Guaranteed completion on real timers, independent of whether rAF keeps ticking
+      // (a backgrounded tab throttles/pauses rAF in real browsers) -- the visual spin is
+      // best-effort via tick(), but the reveal always fires on schedule either way.
+      setTimeout(function(){ phase='decelerating'; phaseStart=performance.now(); },ACCEL_MS);
+      setTimeout(function(){ phase='stopped'; velocity=0; onSpinStopped(); },ACCEL_MS+DECEL_MS);
     });
 
     function onSpinStopped(){
+      if(revealed) return;
+      revealed=true;
       var question=(q&&q.value||'').trim();
       var c=DECK[Math.floor(Math.random()*DECK.length)];
       var qline=question?'<p class="pull-q">Holding your question, '+esc(question.replace(/[.?!]+$/,''))+'…</p>':'';
