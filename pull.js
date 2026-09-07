@@ -98,42 +98,79 @@
   function initWidget(scope){
     var q=scope.querySelector('#tQ'),
         spread=scope.querySelector('#tSpread'), result=scope.querySelector('#tResult'),
-        shuffleBtn=scope.querySelector('#tShuffle');
-    if(!shuffleBtn||!spread) return;
+        pickBtn=scope.querySelector('#tShuffle');
+    if(!pickBtn||!spread) return;
+    pickBtn.textContent='Pick a card';
 
     function esc(s){return (s||'').replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 
-    function buildDeck(){
+    // Continuous circular ticker: cards drift left in an endless loop (wrap via modulo),
+    // riding a shallow arc. Clicking "Pick a card" ramps the drift slow->fast, then eases
+    // it down to a stop before the reveal — the button replaces clicking an individual card.
+    var GAP=16, cardEls=[], offset=0, velocity=0, IDLE_V=22, PEAK_V=640;
+    var phase='idle', phaseStart=0, raf=null, lastTs=null;
+
+    function buildTicker(){
       result.hidden=true;
       spread.hidden=false;
       spread.innerHTML='';
-      spread.style.setProperty('--n',SPREAD);
-      spread.classList.remove('fanned');
-      spread.classList.add('shuffling');
+      cardEls=[];
       for(var i=0;i<SPREAD;i++){
-        var c=document.createElement('button');
-        c.className='t-card-back'; c.type='button'; c.setAttribute('aria-label','Pick this card');
-        c.style.setProperty('--i',i); c.style.setProperty('--n',SPREAD);
-        c.style.setProperty('--d',Math.abs(i-(SPREAD-1)/2));
-        c.style.setProperty('--shuffleDir',i%2===0?1:-1);
+        var c=document.createElement('div');
+        c.className='t-card-back';
         c.innerHTML='<span>✦</span>';
-        c.addEventListener('click',pick);
         spread.appendChild(c);
+        cardEls.push(c);
       }
-      setTimeout(function(){
-        spread.classList.remove('shuffling'); spread.classList.add('fanned');
-        var scroller=spread.parentNode;
-        if(scroller&&scroller.classList.contains('t-spread-scroll')){
-          scroller.scrollLeft=(scroller.scrollWidth-scroller.clientWidth)/2;
-        }
-      },950);
+      offset=0; lastTs=null; phase='idle'; phaseStart=0;
+      layout();
+      if(!raf) raf=requestAnimationFrame(tick);
     }
 
-    // Deck is visible and shuffleable right away, no question required for this part.
-    buildDeck();
-    shuffleBtn.addEventListener('click',buildDeck);
+    function cardWidth(){ return cardEls[0]?cardEls[0].getBoundingClientRect().width:78; }
 
-    function pick(e){
+    function tick(ts){
+      if(lastTs==null) lastTs=ts;
+      var dt=Math.min(.05,(ts-lastTs)/1000); lastTs=ts;
+      var elapsed=ts-phaseStart;
+      if(phase==='accelerating'){
+        var t=Math.min(1,elapsed/1100);
+        velocity=IDLE_V+(PEAK_V-IDLE_V)*(t*t);
+        if(t>=1){ phase='decelerating'; phaseStart=ts; }
+      }else if(phase==='decelerating'){
+        var t2=Math.min(1,elapsed/1000);
+        var eased=1-Math.pow(1-t2,3);
+        velocity=PEAK_V*(1-eased);
+        if(t2>=1){ velocity=0; phase='stopped'; }
+      }else if(phase==='idle'){
+        velocity=IDLE_V;
+      }
+      offset+=velocity*dt;
+      layout();
+      if(phase!=='stopped'){ raf=requestAnimationFrame(tick); }
+      else{ raf=null; onSpinStopped(); }
+    }
+
+    function layout(){
+      var w=spread.clientWidth||1, half=w/2;
+      var spacing=cardWidth()+GAP, loopLen=SPREAD*spacing;
+      for(var i=0;i<SPREAD;i++){
+        var raw=((i*spacing-offset)%loopLen+loopLen)%loopLen;
+        var rel=raw>loopLen/2?raw-loopLen:raw;
+        var x=half+rel;
+        var norm=Math.max(-1,Math.min(1,rel/half));
+        var y=norm*norm*16, rot=norm*9, scale=1-Math.abs(norm)*.12;
+        var op=(x<-60||x>w+60)?0:1-Math.abs(norm)*.3;
+        var el=cardEls[i];
+        el.style.transform='translate3d('+(x-cardWidth()/2)+'px,'+y.toFixed(1)+'px,0) rotate('+rot.toFixed(2)+'deg) scale('+scale.toFixed(3)+')';
+        el.style.opacity=Math.max(0,Math.min(1,op)).toFixed(2);
+        el.style.zIndex=Math.round((1-Math.abs(norm))*100);
+      }
+    }
+
+    buildTicker();
+
+    pickBtn.addEventListener('click',function(){
       var question=(q&&q.value||'').trim();
       if(!question){
         if(q) q.focus();
@@ -142,14 +179,19 @@
         n.textContent='Take a breath and ask the cards a question first, then choose your card.';
         return;
       }
+      if(phase==='accelerating'||phase==='decelerating') return;
       if(HEAVY.test(question)){ gentle(); return; }
+      pickBtn.disabled=true;
+      phase='accelerating'; phaseStart=performance.now(); lastTs=null;
+      if(!raf) raf=requestAnimationFrame(tick);
+    });
 
-      var chosen=e.currentTarget;
-      [].slice.call(spread.querySelectorAll('.t-card-back')).forEach(function(b){ if(b!==chosen) b.classList.add('dim'); b.disabled=true; });
-      chosen.classList.add('chosen');
+    function onSpinStopped(){
+      var question=(q&&q.value||'').trim();
       var c=DECK[Math.floor(Math.random()*DECK.length)];
-      var qline='<p class="pull-q">Holding your question, '+esc(question.replace(/[.?!]+$/,''))+'…</p>';
+      var qline=question?'<p class="pull-q">Holding your question, '+esc(question.replace(/[.?!]+$/,''))+'…</p>':'';
       setTimeout(function(){
+        pickBtn.disabled=false;
         spread.hidden=true;
         result.hidden=false;
         result.innerHTML='<div class="card reveal t-reveal" style="border-color:var(--gold)">'+
@@ -164,19 +206,22 @@
         '</div>';
         if(window.CSFunnel&&window.CSFunnel.wireOptin) window.CSFunnel.wireOptin(result);
         var again=scope.querySelector('#tAgain');
-        if(again) again.onclick=function(){ if(q)q.value=''; buildDeck(); };
+        if(again) again.onclick=function(){ if(q)q.value=''; buildTicker(); };
         result.scrollIntoView({behavior:'smooth',block:'center'});
-      },520);
+      },350);
     }
 
     function gentle(){
+      pickBtn.disabled=false;
       spread.hidden=true;
       result.hidden=false;
       result.innerHTML='<div class="card t-reveal"><p class="eyebrow">A gentle pause</p><h2>Let\'s slow down a moment</h2>'+
         '<p class="pull-refl">That sounds heavy, and it deserves far more than a card. This little tool is only for reflection. For something real and caring, please talk it through with Cherry, or reach a professional who can truly help.</p>'+
         '<a class="btn btn-primary" href="/shop">Book a reading with Cherry</a> <button class="btn btn-ghost" id="tAgain" type="button">Start over</button></div>';
       var again=scope.querySelector('#tAgain');
-      if(again) again.onclick=function(){ if(q)q.value=''; buildDeck(); };
+      if(again) again.onclick=function(){ if(q)q.value=''; buildTicker(); };
     }
   }
+
+  window.CSTarotDeck=DECK;
 })();
