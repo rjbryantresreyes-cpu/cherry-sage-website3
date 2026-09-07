@@ -54,7 +54,11 @@
     overlay.querySelector('.cs-modal-x').addEventListener('click',close);
     document.addEventListener('keydown',function(e){ if(e.key==='Escape'&&!overlay.hidden) close(); });
   }
-  function close(){ if(overlay){ overlay.hidden=true; document.body.style.overflow=''; } }
+  function close(){ if(overlay){
+      if(overlay.dataset.popup==='shuffle' && overlay.dataset.submitted!=='1'){
+        try{ localStorage.setItem('cs-popup-shuffle-dismissed', String(Date.now())); }catch(e){}
+      }
+      overlay.hidden=true; document.body.style.overflow=''; } }
   function open(html){ if(!overlay) build(); overlay.querySelector('.cs-modal-body').innerHTML=html;
     overlay.hidden=false; document.body.style.overflow='hidden'; return overlay.querySelector('.cs-modal-body'); }
 
@@ -81,6 +85,74 @@
       openCard(card);
     });
   });
+
+  // ---- scroll-triggered "quick shuffle" email popup, homepage only ----
+  // Quickly flickers through random glyphs (like a fast shuffle), lands on a real card
+  // drawn from the full 78-card deck (window.CSTarotDeck, set by pull.js), then shows the
+  // same weekly-reading email opt-in as the hero float-cards. Fires once per visit at ~25%
+  // scroll depth; closing it without an email hides it for ~14 days, submitting hides it
+  // for good.
+  var GLYPHS=['✦','✷','☾','❀','◆','⌂','♡','➤','∞','◍','⚖','⸙','❖','⚗','★','☽','☀','❋','◉','⚡','⛓','△','❧','✧','◈'];
+  function openShufflePopup(){
+    var body=open('<div class="cs-reveal-card" id="cspCard"><span class="cs-reveal-glyph" id="cspGlyph">✦</span></div>'+
+      '<p class="eyebrow">Shuffling…</p><h3 id="cspTitle">Finding your card</h3><div id="cspArea"></div>');
+    overlay.dataset.popup='shuffle'; overlay.dataset.submitted='0';
+    var box=body.querySelector('#cspCard'), glyphEl=body.querySelector('#cspGlyph');
+    var n=0, ticks=9;
+    var timer=setInterval(function(){
+      n++;
+      box.classList.remove('cs-reveal-card'); void box.offsetWidth; box.classList.add('cs-reveal-card');
+      glyphEl.textContent=GLYPHS[Math.floor(Math.random()*GLYPHS.length)];
+      if(n>=ticks){
+        clearInterval(timer);
+        var deck=window.CSTarotDeck||[];
+        var d=deck.length?deck[Math.floor(Math.random()*deck.length)]:null;
+        finishShuffleReveal(body, d?{n:d.n,k:d.k,r:d.r,g:d.g}:null);
+      }
+    },110);
+  }
+  function finishShuffleReveal(body, card){
+    if(!card){ close(); return; }
+    var titleEl=body.querySelector('#cspTitle');
+    body.querySelector('.eyebrow').textContent='Your card';
+    if(titleEl) titleEl.outerHTML='<h3>'+card.n+'</h3>';
+    body.querySelector('#cspGlyph').textContent=card.g;
+    body.querySelector('#cspArea').innerHTML=
+      '<p class="cs-modal-keys">'+card.k+'</p>'+
+      '<p class="cs-modal-refl">'+card.r+'</p>'+
+      '<p class="cs-modal-fine">For reflection only. A real reading with Cherry goes far beyond a single card.</p>'+
+      '<a class="btn btn-gold cs-modal-cta" href="/shop.html">Book a real reading with Cherry</a>'+
+      optinHTML('popup-shuffle', card.n);
+    wireOptin(body);
+    var form=body.querySelector('.cs-optin-form');
+    if(form) form.addEventListener('submit',function(){
+      var email=(form.email.value||'').trim();
+      if(EMAIL.test(email)){
+        overlay.dataset.submitted='1';
+        try{ localStorage.setItem('cs-popup-shuffle-submitted','1'); }catch(e){}
+      }
+    });
+  }
+  (function(){
+    if(!/^\/(index\.html)?$/.test(location.pathname)) return;
+    var DISMISS_KEY='cs-popup-shuffle-dismissed', SUBMIT_KEY='cs-popup-shuffle-submitted';
+    var TWO_WEEKS=14*24*60*60*1000, fired=false;
+    try{
+      if(localStorage.getItem(SUBMIT_KEY)) return;
+      var last=parseInt(localStorage.getItem(DISMISS_KEY)||'0',10);
+      if(Date.now()-last < TWO_WEEKS) return;
+    }catch(e){}
+    function onScroll(){
+      if(fired) return;
+      var scrollable=document.documentElement.scrollHeight-window.innerHeight;
+      if(scrollable<=40) return;
+      if((window.scrollY/scrollable) >= .25){
+        fired=true; window.removeEventListener('scroll',onScroll);
+        if(!overlay || overlay.hidden) openShufflePopup();
+      }
+    }
+    window.addEventListener('scroll',onScroll,{passive:true});
+  })();
 
 })();
 
