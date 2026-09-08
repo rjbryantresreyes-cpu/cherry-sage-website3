@@ -25,3 +25,87 @@ collections:
       - { label: "Author (optional)", name: "author", widget: "string", required: false, hint: "The guest author's name, if there is one." }
       - { label: "Featured image", name: "image", widget: "image", hint: "This shows on the article card and at the top of the article." }
       - { label: "Article", name: "body", widget: "markdown", hint: "The full article text. Use the toolbar for bold, headings, links." }
+
+  - name: "pages"
+    label: "Pages"
+    label_singular: "Page"
+    description: "Build a brand-new page for the site. Give it a title, then add sections underneath it, like Text, an Image + Text, a Quote, or a Call-to-Action banner, and put them in whatever order you like. Click Publish and it goes live in about a minute at cherrysage.com/[your title, as a web address]."
+    folder: "content/pages"
+    create: true
+    slug: "{{slug}}"
+    summary: "{{title}}"
+    fields:
+      - { label: "Page Title", name: "title", widget: "string", hint: "Shows as the big heading at the top of the page, and sets the page's web address (cherrysage.com/your-title)." }
+      - { label: "Search Description", name: "description", widget: "text", hint: "One or two sentences describing the page. This is what shows up under the title in a Google search, it isn't shown on the page itself." }
+      - { label: "Small text above the title (optional)", name: "hero_eyebrow", widget: "string", required: false, hint: "A short line above the big heading, e.g. \"For new visitors\"." }
+      - { label: "Intro paragraph (optional)", name: "hero_lede", widget: "text", required: false, hint: "A sentence or two right under the title, setting up what the page is about." }
+      - label: "Page Sections"
+        name: "blocks"
+        widget: "list"
+        hint: "Add as many sections as you like, in any order. Drag the handle on the left of each to reorder them."
+        types:
+          - label: "Text"
+            name: "text"
+            widget: "object"
+            summary: "Text — {{fields.heading}}"
+            fields:
+              - { label: "Heading (optional)", name: "heading", widget: "string", required: false }
+              - { label: "Text", name: "body", widget: "markdown" }
+          - label: "Image + Text"
+            name: "image_text"
+            widget: "object"
+            summary: "Image + Text — {{fields.heading}}"
+            fields:
+              - { label: "Heading (optional)", name: "heading", widget: "string", required: false }
+              - { label: "Text", name: "body", widget: "text" }
+              - { label: "Image", name: "image", widget: "image" }
+              - { label: "Image side", name: "image_position", widget: "select", options: [{ label: "Left", value: "left" }, { label: "Right", value: "right" }], default: "left" }
+          - label: "Quote / Testimonial"
+            name: "quote"
+            widget: "object"
+            summary: "Quote — {{fields.name}}"
+            fields:
+              - { label: "Quote", name: "quote", widget: "text" }
+              - { label: "Name", name: "name", widget: "string" }
+              - { label: "Role or context (optional)", name: "role", widget: "string", required: false, hint: "e.g. \"Client since 2019\"" }
+          - label: "Call-to-Action Banner (text)"
+            name: "cta_text"
+            widget: "object"
+            summary: "CTA — {{fields.heading}}"
+            fields:
+              - { label: "Heading", name: "heading", widget: "string" }
+              - { label: "Text (optional)", name: "body", widget: "string", required: false }
+              - { label: "Button text", name: "button_label", widget: "string", default: "Book a Reading" }
+              - { label: "Button link", name: "button_link", widget: "string", default: "/shop", hint: "e.g. /shop, or a full https:// link" }
+          - label: "Call-to-Action Banner (image)"
+            name: "cta_image"
+            widget: "object"
+            summary: "Image CTA"
+            fields:
+              - { label: "Banner image", name: "image", widget: "image", hint: "Design the whole banner as one image, matching the ones already on the site." }
+              - { label: "Alt text", name: "alt_text", widget: "string", hint: "Describe what the banner says, for accessibility and search." }
+              - { label: "Link", name: "link", widget: "string", default: "/shop" }
+          - label: "FAQ"
+            name: "faq"
+            widget: "object"
+            summary: "FAQ — {{fields.heading}}"
+            fields:
+              - { label: "Heading", name: "heading", widget: "string", default: "Frequently Asked Questions" }
+              - label: "Questions"
+                name: "items"
+                widget: "list"
+                fields:
+                  - { label: "Question", name: "question", widget: "string" }
+                  - { label: "Answer", name: "answer", widget: "text" }
+          - label: "Gallery"
+            name: "gallery"
+            widget: "object"
+            summary: "Gallery — {{fields.heading}}"
+            fields:
+              - { label: "Heading (optional)", name: "heading", widget: "string", required: false }
+              - label: "Images"
+                name: "images"
+                widget: "list"
+                fields:
+                  - { label: "Image", name: "image", widget: "image" }
+                  - { label: "Caption (optional)", name: "caption", widget: "string", required: false }

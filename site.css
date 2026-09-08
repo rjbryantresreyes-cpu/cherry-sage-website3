@@ -817,3 +817,31 @@ main section>.wrap,.hero>.wrap,.page-hero>.wrap,.draw-section>.wrap{position:rel
 .cs-comments-form button{justify-self:start}
 .cs-comments-note{margin:0;color:var(--cherry);font-size:.88rem}
 .cs-comments-thanks{margin:0;color:var(--oxblood);font-weight:600}
+
+/* ---- Page-builder blocks (Bev's editable Pages collection) ---- */
+.blk-prose{max-width:720px}
+.blk-prose p{margin:0 0 1.1rem;line-height:1.75}
+.blk-prose img{border-radius:var(--r);margin:.6rem 0}
+
+.blk-imgtext{display:grid;grid-template-columns:1fr 1fr;gap:2.4rem;align-items:center}
+.blk-imgtext.right{direction:rtl}
+.blk-imgtext.right>*{direction:ltr}
+.blk-imgtext img{width:100%;border-radius:var(--r-lg);box-shadow:var(--shadow-sm)}
+.blk-imgtext h2{margin:0 0 .6rem}
+.blk-imgtext p{margin:0;line-height:1.7;color:var(--ink)}
+@media(max-width:760px){.blk-imgtext{grid-template-columns:1fr}.blk-imgtext.right{direction:ltr}}
+
+.blk-quote{max-width:680px;margin:0 auto;text-align:center;padding:2.2rem 1rem}
+.blk-quote blockquote{font-family:var(--font-display);font-style:italic;font-size:1.35rem;line-height:1.5;color:var(--oxblood-deep);margin:0 0 1rem;border-left:3px solid var(--gold);padding-left:1.2rem;text-align:left}
+.blk-quote figcaption{color:var(--ink-soft);font-size:.92rem}
+.blk-quote figcaption strong{color:var(--oxblood);font-family:var(--font-display)}
+
+.blk-faq-item{border-bottom:1px solid var(--line);padding:1.1rem 0}
+.blk-faq-item:last-child{border-bottom:none}
+.blk-faq-item h3{font-size:1.05rem;margin:0 0 .4rem;color:var(--oxblood-deep)}
+.blk-faq-item p{margin:0;color:var(--ink-soft);line-height:1.65}
+
+.blk-gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1.2rem}
+.blk-gallery figure{margin:0}
+.blk-gallery img{width:100%;height:220px;object-fit:cover;border-radius:var(--r);display:block}
+.blk-gallery figcaption{margin-top:.5rem;font-size:.85rem;color:var(--ink-soft);text-align:center}

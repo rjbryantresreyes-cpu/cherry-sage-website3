@@ -3,11 +3,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node scripts/build-articles.js"
+    "build": "node scripts/build-articles.js && node scripts/build-pages.js"
   },
   "dependencies": {
     "@netlify/blobs": "^8.2.0",
     "@supabase/supabase-js": "^2.116.0",
+    "js-yaml": "^4.3.2",
     "marked": "^18.0.11"
   }
 }
