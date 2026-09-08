@@ -7,7 +7,18 @@ import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { marked } from "marked";
 import yaml from "js-yaml";
+import sanitizeHtml from "sanitize-html";
 const { load: loadYaml } = yaml;
+
+// Content here comes from the Pages CMS, which will eventually be editable by anyone with
+// login access to it (not just BBC). marked() renders raw HTML straight through with zero
+// sanitization by default, so anything typed into a Text/Image+Text field could otherwise land
+// on the live site as real, executing markup. Strip it down to a safe prose subset instead.
+const BLOCK_TAGS = ["p", "br", "strong", "em", "b", "i", "a", "ul", "ol", "li", "blockquote", "h2", "h3", "h4", "code", "pre", "img"];
+const BLOCK_ATTRS = { a: ["href", "title", "target", "rel"], img: ["src", "alt", "title"] };
+const INLINE_TAGS = ["strong", "em", "b", "i", "a", "code"];
+const INLINE_ATTRS = { a: ["href", "title"] };
+const SAFE_SCHEMES = ["http", "https", "mailto"];
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const CONTENT_DIR = join(ROOT, "content", "pages");
@@ -30,7 +41,14 @@ function parseFrontMatter(raw) {
 
 function mdInline(s) {
   // Renders short markdown (bold/italic/links) without wrapping it in a <p>, for headings/labels.
-  return marked.parseInline(String(s || "").trim());
+  const raw = marked.parseInline(String(s || "").trim());
+  return sanitizeHtml(raw, { allowedTags: INLINE_TAGS, allowedAttributes: INLINE_ATTRS, allowedSchemes: SAFE_SCHEMES });
+}
+
+function mdBlock(s) {
+  // Renders a full markdown body (paragraphs, links, basic formatting) for a Text block.
+  const raw = marked.parse(String(s || "").trim());
+  return sanitizeHtml(raw, { allowedTags: BLOCK_TAGS, allowedAttributes: BLOCK_ATTRS, allowedSchemes: SAFE_SCHEMES });
 }
 
 function renderBlock(block, i) {
@@ -39,7 +57,7 @@ function renderBlock(block, i) {
       const heading = block.heading
         ? `<div class="section-head reveal"><h2>${mdInline(block.heading)}</h2></div>`
         : "";
-      return `<section class="section"><div class="wrap">${heading}<div class="blk-prose reveal">${marked.parse(String(block.body || "").trim())}</div></div></section>`;
+      return `<section class="section"><div class="wrap">${heading}<div class="blk-prose reveal">${mdBlock(block.body)}</div></div></section>`;
     }
     case "image_text": {
       const side = block.image_position === "right" ? " right" : "";

@@ -6,6 +6,17 @@ import { readFileSync, writeFileSync, existsSync, readdirSync, mkdirSync } from 
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { marked } from "marked";
+import sanitizeHtml from "sanitize-html";
+
+// Article bodies come straight from the Guest Articles CMS. marked() renders raw HTML through
+// with zero sanitization by default, so anything typed into the body field could otherwise land
+// on the live site as real, executing markup. Strip it down to a safe prose subset instead.
+const BLOCK_TAGS = ["p", "br", "strong", "em", "b", "i", "a", "ul", "ol", "li", "blockquote", "h2", "h3", "h4", "code", "pre", "img"];
+const BLOCK_ATTRS = { a: ["href", "title", "target", "rel"], img: ["src", "alt", "title"] };
+const SAFE_SCHEMES = ["http", "https", "mailto"];
+function mdBlock(s) {
+  return sanitizeHtml(marked.parse(String(s || "").trim()), { allowedTags: BLOCK_TAGS, allowedAttributes: BLOCK_ATTRS, allowedSchemes: SAFE_SCHEMES });
+}
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const CONTENT_DIR = join(ROOT, "content", "articles");
@@ -214,7 +225,7 @@ function main() {
     }
 
     const isNew = !existsSync(outPath);
-    const bodyHtml = marked.parse(body.trim());
+    const bodyHtml = mdBlock(body);
     const description = plainExcerpt(body);
 
     const page = renderPage({
