@@ -764,15 +764,22 @@ main section>.wrap,.hero>.wrap,.page-hero>.wrap,.draw-section>.wrap{position:rel
 .img-banner.light{background:#faf6ef}
 .img-banner.top{margin-top:var(--header-h)}
 
-/* ---- Photo hero: heading copy layered directly onto the header photo ---- */
+/* ---- Photo hero: heading copy layered into the header photo's own empty space ---- */
 .photo-hero{position:relative;margin-top:var(--header-h);overflow:hidden}
 .photo-hero img{width:100%;height:auto;display:block}
-.photo-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(74,15,25,.08) 0%,rgba(74,15,25,.55) 62%,rgba(58,12,20,.92) 100%);pointer-events:none}
-.photo-hero-copy{position:absolute;left:0;right:0;bottom:0;padding:0 0 2.6rem;text-align:center;z-index:1}
+.photo-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,transparent 54%,rgba(74,15,25,.18) 64%,rgba(74,15,25,.58) 100%);pointer-events:none}
+.photo-hero-copy{position:absolute;top:0;right:0;bottom:0;width:40%;display:flex;flex-direction:column;justify-content:center;padding:1rem 5% 1rem 2%;text-align:left;z-index:1}
 .photo-hero-copy .eyebrow{color:var(--gold-bright)}
-.photo-hero-copy h1{color:var(--cream);margin:.2rem 0}
-.photo-hero-copy .lede{color:rgba(255,253,248,.94);max-width:640px;margin:.5rem auto 0}
-@media(max-width:640px){.photo-hero-copy{padding-bottom:1.4rem}.photo-hero-copy h1{font-size:1.7rem}}
+.photo-hero-copy h1{color:var(--cream);margin:.3rem 0;font-size:clamp(1.7rem,3vw,2.5rem);line-height:1.15}
+.photo-hero-copy .lede{color:rgba(255,253,248,.94);margin:.6rem 0 0;font-size:.95rem;line-height:1.6}
+@media(max-width:760px){
+  .photo-hero img{height:420px;object-fit:cover}
+  .photo-hero::after{background:linear-gradient(180deg,rgba(74,15,25,.08) 0%,rgba(74,15,25,.55) 55%,rgba(58,12,20,.92) 100%)}
+  .photo-hero-copy{position:absolute;left:0;right:0;top:auto;bottom:0;width:auto;padding:0 1.2rem 1.3rem;text-align:center;display:block}
+  .photo-hero-copy h1{font-size:1.7rem}
+  .photo-hero-copy .lede{font-size:.9rem}
+}
+@media(max-width:400px){.photo-hero img{height:380px}}
 
 /* nl+cloud v31 */
 /* Newsletter signup box — Bev asked for a real designed box, not a plain footer strip
