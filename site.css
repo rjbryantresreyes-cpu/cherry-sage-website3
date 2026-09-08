@@ -673,7 +673,7 @@ main section>.wrap,.hero>.wrap,.page-hero>.wrap,.draw-section>.wrap{position:rel
    endless loop along a shallow arc, positioned every frame by pull.js via inline transform —
    no CSS transition here, it would fight the per-frame updates and lag behind them. */
 .t-spread-scroll{overflow:hidden;padding:12px 0 8px}
-.t-spread{position:relative;height:170px;margin:0 auto;width:100%;max-width:640px}
+.t-spread{position:relative;height:170px;margin:0 auto;width:100%;max-width:520px}
 .t-card-back{position:absolute;top:21px;left:0;width:78px;height:128px;border-radius:11px;pointer-events:none;
   background:radial-gradient(circle at 40% 30%,#7c2233,var(--oxblood) 55%,var(--oxblood-deep));
   border:1px solid var(--gold-soft);box-shadow:0 10px 26px -12px rgba(74,15,25,.55);

@@ -58,8 +58,18 @@
       if(overlay.dataset.popup==='shuffle' && overlay.dataset.submitted!=='1'){
         try{ localStorage.setItem('cs-popup-shuffle-dismissed', String(Date.now())); }catch(e){}
       }
-      overlay.hidden=true; document.body.style.overflow=''; } }
+      overlay.hidden=true;
+      var y=-parseInt(document.body.style.top||'0',10);
+      document.body.style.position=''; document.body.style.top=''; document.body.style.width='';
+      document.body.style.overflow='';
+      window.scrollTo(0,y);
+    } }
   function open(html){ if(!overlay) build(); overlay.querySelector('.cs-modal-body').innerHTML=html;
+    // iOS Safari keeps rubber-band/momentum scrolling going even after overflow:hidden, so a
+    // popup opened mid-scroll visibly jumps around under the user (this is what Bev saw on her
+    // iPad). Pinning body to a fixed position at the current scroll offset stops it outright.
+    var y=window.scrollY||window.pageYOffset||0;
+    document.body.style.position='fixed'; document.body.style.top=(-y)+'px'; document.body.style.width='100%';
     overlay.hidden=false; document.body.style.overflow='hidden'; return overlay.querySelector('.cs-modal-body'); }
 
   function glyphOf(card){ for(var g in HERO){ if(HERO[g]===card) return g; } return '✦'; }
