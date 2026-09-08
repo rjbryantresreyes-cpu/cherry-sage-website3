@@ -27,6 +27,7 @@ export default async (req) => {
   const email = String(d.email || "").trim().toLowerCase();
   const fullName = String(d.name || "").trim().slice(0, 200);
   const phone = String(d.phone || "").trim().slice(0, 40);
+  const birthday = String(d.birthday || "").trim(); // optional, YYYY-MM-DD
   const slotIso = String(d.slotIso || "");
   const durationMinutes = parseInt(d.durationMinutes, 10);
   const readingProductId = String(d.readingProductId || "");
@@ -66,6 +67,26 @@ export default async (req) => {
     p_start: slotIso, p_duration_minutes: durationMinutes, p_hold_seconds: 600,
   });
   if (holdErr) return json({ error: "could not hold slot: " + holdErr.message }, 500);
+
+  // Tag the contact in Brevo as "checkout started" -- this is what the (separately configured)
+  // abandoned-checkout automation watches for. Best-effort: a real slot hold should never fail
+  // just because Brevo had a hiccup.
+  const BREVO_KEY = process.env.BREVO_KEY;
+  if (BREVO_KEY) {
+    try {
+      await fetch("https://api.brevo.com/v3/contacts", {
+        method: "POST",
+        headers: { "api-key": BREVO_KEY, "content-type": "application/json", accept: "application/json" },
+        body: JSON.stringify({
+          email, updateEnabled: true,
+          attributes: {
+            FIRSTNAME: fullName, SOURCE: "checkout", CHECKOUT_STATUS: "started",
+            ...(birthday ? { BIRTHDAY: birthday } : {}),
+          },
+        }),
+      });
+    } catch { /* non-fatal */ }
+  }
 
   return json({
     ok: true,

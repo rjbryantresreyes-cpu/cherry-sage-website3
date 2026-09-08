@@ -115,6 +115,18 @@ export default async (req) => {
   // Notify both sides. Best-effort -- a booking that already succeeded should not fail the
   // customer's request just because an email had trouble sending.
   const { data: customer } = await supabase.from("customers").select("email, full_name").eq("id", customerId).maybeSingle();
+
+  // Mark the Brevo contact as converted so the abandoned-checkout automation leaves them alone.
+  const BREVO_KEY = process.env.BREVO_KEY;
+  if (BREVO_KEY && customer?.email) {
+    try {
+      await fetch("https://api.brevo.com/v3/contacts", {
+        method: "POST",
+        headers: { "api-key": BREVO_KEY, "content-type": "application/json", accept: "application/json" },
+        body: JSON.stringify({ email: customer.email, updateEnabled: true, attributes: { CHECKOUT_STATUS: "completed" } }),
+      });
+    } catch { /* non-fatal */ }
+  }
   const when = new Date(hold.requested_start).toLocaleString("en-US", {
     timeZone: "America/New_York", weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "2-digit",
   }) + " Eastern";

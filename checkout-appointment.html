@@ -70,6 +70,9 @@
       <input type="text" name="name" placeholder="Your name" required class="ck-field">
       <input type="email" name="email" placeholder="Your email" required class="ck-field">
       <input type="tel" name="phone" placeholder="Phone (optional)" class="ck-field">
+      <label style="display:grid;gap:.3rem;font-size:.8rem;color:var(--ink-soft)">Birthday (optional — Cherry likes to send a little something on your day)
+        <input type="date" name="birthday" class="ck-field">
+      </label>
       <div class="ck-summary" id="ckSummary" hidden>
         <dt>Reading</dt><dd id="ckSumProduct"></dd>
         <dt>When</dt><dd id="ckSumTime"></dd>
@@ -208,7 +211,7 @@
     if(form.website.value){ return; }
     note.hidden=true; btn.disabled=true; btn.textContent='Reserving…';
     fetch('/.netlify/functions/checkout-start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-      name:form.name.value.trim(), email:email, phone:form.phone.value.trim(),
+      name:form.name.value.trim(), email:email, phone:form.phone.value.trim(), birthday:form.birthday.value,
       slotIso:selectedSlotIso, durationMinutes:selectedProduct.duration, readingProductId:selectedProduct.id
     })}).then(function(r){return r.json().then(function(d){return {ok:r.ok, data:d};});})
     .then(function(res){
