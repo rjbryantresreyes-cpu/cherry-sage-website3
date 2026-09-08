@@ -42,7 +42,7 @@
 
   dealBtn.addEventListener('click',function(){
     var question=(q.value||'').trim();
-    if(!question){ q.focus(); note("Take a breath and ask the cards a question first."); return; }
+    if(!question){ note("Take a breath and ask the cards a question first."); return; }
     if(HEAVY.test(question)){ gentle(); return; }
     var idx=[]; while(idx.length<3){ var r=Math.floor(Math.random()*DECK.length); if(idx.indexOf(r)<0) idx.push(r); }
     picks=idx.map(function(i){return DECK[i];}); revealed=0;
@@ -88,8 +88,12 @@
   }
 
   function note(t){ var n=document.getElementById('sQNote');
-    if(!n){ n=document.createElement('p'); n.id='sQNote'; n.style.cssText='color:var(--cherry);font-size:.9rem;margin:.7rem 0 0'; q.parentNode.appendChild(n); }
-    n.textContent=t; }
+    if(!n){ n=document.createElement('p'); n.id='sQNote'; n.style.cssText='color:var(--cherry);font-size:.95rem;font-weight:600;margin:.7rem 0 0;transition:opacity .15s'; q.parentNode.appendChild(n); }
+    n.textContent=t;
+    n.scrollIntoView({behavior:'smooth',block:'center'});
+    n.style.opacity='0';
+    setTimeout(function(){ n.style.opacity='1'; q.focus(); },200);
+  }
   function gentle(){ s1.hidden=true; s2.hidden=true; result.hidden=false;
     result.innerHTML='<div class="card"><p class="eyebrow">A gentle pause</p><h3>Let\'s slow down a moment</h3>'+
       '<p class="pull-refl">That sounds heavy, and it deserves far more than cards. This little tool is only for reflection. For something real and caring, please talk it through with Cherry, or reach a professional who can truly help.</p>'+

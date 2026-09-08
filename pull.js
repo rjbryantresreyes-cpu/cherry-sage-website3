@@ -135,10 +135,12 @@
     function pick(e){
       var question=(q&&q.value||'').trim();
       if(!question){
-        if(q) q.focus();
         var n=scope.querySelector('#tQNote');
-        if(!n){ n=document.createElement('p'); n.id='tQNote'; n.style.cssText='color:var(--cherry);font-size:.9rem;margin:.7rem 0 0;text-align:center'; (q?q.parentNode:spread.parentNode).appendChild(n); }
+        if(!n){ n=document.createElement('p'); n.id='tQNote'; n.style.cssText='color:var(--cherry);font-size:.95rem;font-weight:600;margin:.7rem 0 0;text-align:center;transition:opacity .15s'; (q?q.parentNode:spread.parentNode).appendChild(n); }
         n.textContent='Take a breath and ask the cards a question first, then choose your card.';
+        n.scrollIntoView({behavior:'smooth',block:'center'});
+        n.style.opacity='0';
+        setTimeout(function(){ n.style.opacity='1'; if(q) q.focus(); },200);
         return;
       }
       if(HEAVY.test(question)){ gentle(); return; }
