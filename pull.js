@@ -98,80 +98,41 @@
   function initWidget(scope){
     var q=scope.querySelector('#tQ'),
         spread=scope.querySelector('#tSpread'), result=scope.querySelector('#tResult'),
-        pickBtn=scope.querySelector('#tShuffle');
-    if(!pickBtn||!spread) return;
-    pickBtn.textContent='Pick a card';
+        shuffleBtn=scope.querySelector('#tShuffle');
+    if(!shuffleBtn||!spread) return;
+    shuffleBtn.textContent='Shuffle the deck';
 
     function esc(s){return (s||'').replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 
-    // Continuous circular ticker: cards drift left in an endless loop (wrap via modulo),
-    // riding a shallow arc. Clicking "Pick a card" ramps the drift slow->fast, then eases
-    // it down to a stop before the reveal — the button replaces clicking an individual card.
-    var GAP=16, cardEls=[], offset=0, velocity=0, IDLE_V=22, PEAK_V=640;
-    var ACCEL_MS=1100, DECEL_MS=1000;
-    var phase='idle', phaseStart=0, raf=null, lastTs=null, revealed=false;
-
-    function buildTicker(){
+    // Bev's call (2026-09-08): a static fan you click directly to pick a card. The button
+    // only re-shuffles/re-fans the deck; it never picks anything by itself.
+    function buildDeck(){
       result.hidden=true;
       spread.hidden=false;
       spread.innerHTML='';
-      cardEls=[];
+      spread.style.setProperty('--n',SPREAD);
+      spread.classList.remove('fanned');
+      spread.classList.add('shuffling');
       for(var i=0;i<SPREAD;i++){
-        var c=document.createElement('div');
-        c.className='t-card-back';
+        var c=document.createElement('button');
+        c.className='t-card-back'; c.type='button'; c.setAttribute('aria-label','Pick this card');
+        c.style.setProperty('--i',i); c.style.setProperty('--n',SPREAD);
+        c.style.setProperty('--d',Math.abs(i-(SPREAD-1)/2));
+        c.style.setProperty('--shuffleDir',i%2===0?1:-1);
         c.innerHTML='<span>✦</span>';
+        c.addEventListener('click',pick);
         spread.appendChild(c);
-        cardEls.push(c);
       }
-      offset=0; lastTs=null; phase='idle'; phaseStart=0; revealed=false;
-      layout();
-      if(!raf) raf=requestAnimationFrame(tick);
+      setTimeout(function(){
+        spread.classList.remove('shuffling'); spread.classList.add('fanned');
+      },900);
     }
 
-    function cardWidth(){ return cardEls[0]?cardEls[0].getBoundingClientRect().width:78; }
+    // Deck is visible and re-shufflable right away, no question required for this part.
+    buildDeck();
+    shuffleBtn.addEventListener('click',buildDeck);
 
-    function tick(ts){
-      if(lastTs==null) lastTs=ts;
-      var dt=Math.min(.05,(ts-lastTs)/1000); lastTs=ts;
-      var elapsed=ts-phaseStart;
-      if(phase==='accelerating'){
-        var t=Math.min(1,elapsed/ACCEL_MS);
-        velocity=IDLE_V+(PEAK_V-IDLE_V)*(t*t);
-      }else if(phase==='decelerating'){
-        var t2=Math.min(1,elapsed/DECEL_MS);
-        var eased=1-Math.pow(1-t2,3);
-        velocity=PEAK_V*(1-eased);
-      }else if(phase==='idle'){
-        velocity=IDLE_V;
-      }else{
-        velocity=0;
-      }
-      offset+=velocity*dt;
-      layout();
-      if(phase!=='stopped'){ raf=requestAnimationFrame(tick); }
-      else{ raf=null; }
-    }
-
-    function layout(){
-      var w=spread.clientWidth||1, half=w/2;
-      var spacing=cardWidth()+GAP, loopLen=SPREAD*spacing;
-      for(var i=0;i<SPREAD;i++){
-        var raw=((i*spacing-offset)%loopLen+loopLen)%loopLen;
-        var rel=raw>loopLen/2?raw-loopLen:raw;
-        var x=half+rel;
-        var norm=Math.max(-1,Math.min(1,rel/half));
-        var y=norm*norm*16, rot=norm*9, scale=1-Math.abs(norm)*.12;
-        var op=(x<-60||x>w+60)?0:1-Math.abs(norm)*.3;
-        var el=cardEls[i];
-        el.style.transform='translate3d('+(x-cardWidth()/2)+'px,'+y.toFixed(1)+'px,0) rotate('+rot.toFixed(2)+'deg) scale('+scale.toFixed(3)+')';
-        el.style.opacity=Math.max(0,Math.min(1,op)).toFixed(2);
-        el.style.zIndex=Math.round((1-Math.abs(norm))*100);
-      }
-    }
-
-    buildTicker();
-
-    pickBtn.addEventListener('click',function(){
+    function pick(e){
       var question=(q&&q.value||'').trim();
       if(!question){
         if(q) q.focus();
@@ -180,26 +141,14 @@
         n.textContent='Take a breath and ask the cards a question first, then choose your card.';
         return;
       }
-      if(phase==='accelerating'||phase==='decelerating') return;
       if(HEAVY.test(question)){ gentle(); return; }
-      pickBtn.disabled=true;
-      phase='accelerating'; phaseStart=performance.now(); lastTs=null;
-      if(!raf) raf=requestAnimationFrame(tick);
-      // Guaranteed completion on real timers, independent of whether rAF keeps ticking
-      // (a backgrounded tab throttles/pauses rAF in real browsers) -- the visual spin is
-      // best-effort via tick(), but the reveal always fires on schedule either way.
-      setTimeout(function(){ phase='decelerating'; phaseStart=performance.now(); },ACCEL_MS);
-      setTimeout(function(){ phase='stopped'; velocity=0; onSpinStopped(); },ACCEL_MS+DECEL_MS);
-    });
 
-    function onSpinStopped(){
-      if(revealed) return;
-      revealed=true;
-      var question=(q&&q.value||'').trim();
+      var chosen=e.currentTarget;
+      [].slice.call(spread.querySelectorAll('.t-card-back')).forEach(function(b){ if(b!==chosen) b.classList.add('dim'); b.disabled=true; });
+      chosen.classList.add('chosen');
       var c=DECK[Math.floor(Math.random()*DECK.length)];
-      var qline=question?'<p class="pull-q">Holding your question, '+esc(question.replace(/[.?!]+$/,''))+'…</p>':'';
+      var qline='<p class="pull-q">Holding your question, '+esc(question.replace(/[.?!]+$/,''))+'…</p>';
       setTimeout(function(){
-        pickBtn.disabled=false;
         spread.hidden=true;
         result.hidden=false;
         result.innerHTML='<div class="card reveal t-reveal" style="border-color:var(--gold)">'+
@@ -214,20 +163,19 @@
         '</div>';
         if(window.CSFunnel&&window.CSFunnel.wireOptin) window.CSFunnel.wireOptin(result);
         var again=scope.querySelector('#tAgain');
-        if(again) again.onclick=function(){ if(q)q.value=''; buildTicker(); };
+        if(again) again.onclick=function(){ if(q)q.value=''; buildDeck(); };
         result.scrollIntoView({behavior:'smooth',block:'center'});
-      },350);
+      },520);
     }
 
     function gentle(){
-      pickBtn.disabled=false;
       spread.hidden=true;
       result.hidden=false;
       result.innerHTML='<div class="card t-reveal"><p class="eyebrow">A gentle pause</p><h2>Let\'s slow down a moment</h2>'+
         '<p class="pull-refl">That sounds heavy, and it deserves far more than a card. This little tool is only for reflection. For something real and caring, please talk it through with Cherry, or reach a professional who can truly help.</p>'+
         '<a class="btn btn-primary" href="/shop">Book a reading with Cherry</a> <button class="btn btn-ghost" id="tAgain" type="button">Start over</button></div>';
       var again=scope.querySelector('#tAgain');
-      if(again) again.onclick=function(){ if(q)q.value=''; buildTicker(); };
+      if(again) again.onclick=function(){ if(q)q.value=''; buildDeck(); };
     }
   }
 

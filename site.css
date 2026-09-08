@@ -672,13 +672,27 @@ main section>.wrap,.hero>.wrap,.page-hero>.wrap,.draw-section>.wrap{position:rel
 /* Continuous circular ticker (replaces the old click-to-fan deck): cards drift in an
    endless loop along a shallow arc, positioned every frame by pull.js via inline transform —
    no CSS transition here, it would fight the per-frame updates and lag behind them. */
-.t-spread-scroll{overflow:hidden;padding:12px 0 8px}
-.t-spread{position:relative;height:170px;margin:0 auto;width:100%;max-width:520px}
-.t-card-back{position:absolute;top:21px;left:0;width:78px;height:128px;border-radius:11px;pointer-events:none;
+/* Bev's call (2026-09-08): click the actual card to pick it; the button just shuffles. */
+.t-spread-scroll{overflow:hidden;padding:12px 0 28px}
+.t-spread{position:relative;height:200px;margin:0 auto;width:100%;max-width:520px}
+.t-card-back{position:absolute;top:30px;left:50%;margin-left:-39px;width:78px;height:128px;border-radius:11px;cursor:pointer;
   background:radial-gradient(circle at 40% 30%,#7c2233,var(--oxblood) 55%,var(--oxblood-deep));
   border:1px solid var(--gold-soft);box-shadow:0 10px 26px -12px rgba(74,15,25,.55);
   display:flex;align-items:center;justify-content:center;color:var(--gold-bright);font-size:1.3rem;
-  will-change:transform,opacity}
+  transform-origin:center center;transition:transform .55s cubic-bezier(.2,.8,.2,1),opacity .35s,filter .2s;
+  transform:translateX(0) rotate(0);opacity:0}
+.t-spread.shuffling .t-card-back{animation:tShuffle .8s cubic-bezier(.4,0,.2,1) backwards;animation-delay:calc(var(--i,0) * 6ms)}
+.t-spread.fanned .t-card-back{opacity:1;transform:translateX(calc((var(--i) - (var(--n) - 1)/2) * 20px)) translateY(calc(var(--d,0) * 2px)) rotate(calc((var(--i) - (var(--n) - 1)/2) * 1.4deg))}
+.t-spread.fanned .t-card-back:hover{filter:brightness(1.18);z-index:6;transform:translateX(calc((var(--i) - (var(--n) - 1)/2) * 20px)) translateY(calc(var(--d,0) * 2px - 16px)) rotate(calc((var(--i) - (var(--n) - 1)/2) * 1.4deg))}
+.t-card-back.chosen{z-index:20;filter:brightness(1.2)}
+.t-card-back.dim{opacity:.28;filter:grayscale(.4)}
+@keyframes tShuffle{
+  0%{transform:translateX(0) rotate(0) scale(1)}
+  22%{transform:translateX(calc(var(--shuffleDir,1) * -46px)) rotate(calc(var(--shuffleDir,1) * -7deg)) scale(1.04)}
+  48%{transform:translateX(calc(var(--shuffleDir,1) * 36px)) rotate(calc(var(--shuffleDir,1) * 6deg)) scale(1.03)}
+  72%{transform:translateX(calc(var(--shuffleDir,1) * -18px)) rotate(calc(var(--shuffleDir,1) * -3deg)) scale(1.01)}
+  100%{transform:translateX(0) rotate(0) scale(1)}
+}
 .t-reveal{text-align:center;padding:2rem 1.6rem}
 .t-face{width:92px;height:150px;margin:0 auto 1rem;border-radius:14px;
   background:radial-gradient(circle at 40% 30%,#7c2233,var(--oxblood) 55%,var(--oxblood-deep));
@@ -692,7 +706,9 @@ main section>.wrap,.hero>.wrap,.page-hero>.wrap,.draw-section>.wrap{position:rel
 .pull-refl{font-size:1.08rem;line-height:1.6;color:var(--ink);max-width:52ch;margin:0 auto 1rem}
 .t-forreflection{font-size:.85rem;color:var(--ink-soft);max-width:46ch;margin:0 auto 1.4rem}
 .t-actions{display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap}
-@media(max-width:560px){.t-card-back{width:60px;height:98px}.t-spread{height:140px}}
+@media(max-width:560px){.t-card-back{width:60px;height:98px;margin-left:-30px}.t-spread{height:170px}
+  .t-spread.fanned .t-card-back{transform:translateX(calc((var(--i) - (var(--n) - 1)/2) * 12px)) translateY(calc(var(--d,0) * 1.3px)) rotate(calc((var(--i) - (var(--n) - 1)/2) * 1.1deg))}
+  .t-spread.fanned .t-card-back:hover{transform:translateX(calc((var(--i) - (var(--n) - 1)/2) * 12px)) translateY(calc(var(--d,0) * 1.3px - 12px)) rotate(calc((var(--i) - (var(--n) - 1)/2) * 1.1deg))}}
 
 /* ============ 2026-08-31: mobile home hero fix — photo orb was collapsing (0x0) + hidden ============ */
 .hero-art{opacity:1 !important;transform:none !important}
