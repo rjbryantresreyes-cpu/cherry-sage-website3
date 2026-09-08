@@ -143,7 +143,13 @@
     btn.disabled=true;
     fetch('/.netlify/functions/appointments-admin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
       .then(function(r){return r.json();})
-      .then(function(res){ if(res.ok) load(); else { alert('Could not update — try reloading.'); btn.disabled=false; } });
+      .then(function(res){
+        if(!res.ok){ alert('Could not update — try reloading.'); btn.disabled=false; return; }
+        if(res.refund && res.refund.attempted && !res.refund.succeeded){
+          alert('Declined, but the automatic refund did not go through: '+(res.refund.error||'unknown error')+'. Please refund this one manually in Clover.');
+        }
+        load();
+      });
   });
 })();
 </script><section class="section section-dark cta" id="book"><div class="wrap reveal"><h2>Ready for clarity?</h2><p>Your first step is a quiet one. Book your reading and let the answers you're seeking find their way to you.</p><a class='btn btn-gold' href='/shop'>Book a Reading</a></div></section>

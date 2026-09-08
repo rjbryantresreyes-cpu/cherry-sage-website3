@@ -111,6 +111,25 @@ export default async (req) => {
     }, 500);
   }
 
+  // Notify both sides. Best-effort -- a booking that already succeeded should not fail the
+  // customer's request just because an email had trouble sending.
+  const { data: customer } = await supabase.from("customers").select("email, full_name").eq("id", customerId).maybeSingle();
+  const when = new Date(hold.requested_start).toLocaleString("en-US", {
+    timeZone: "America/New_York", weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "2-digit",
+  }) + " Eastern";
+  const money = (c) => "$" + (c / 100).toFixed(2);
+  await notify(process.env.NOTIFY_EMAIL, `New paid booking — ${product.name}`,
+    `<p><strong>${esc(customer?.full_name || "A customer")}</strong> just booked and paid for a reading.</p>` +
+    `<p>Reading: ${esc(product.name)}<br>When: ${esc(when)}<br>Amount: ${money(product.price_cents)}<br>Email: ${esc(customer?.email || "")}</p>` +
+    `<p style="color:#888;font-size:12px">Approve, decline, or offer an alternate time at /appointments-dashboard.html</p>`,
+    customer?.email ? { email: customer.email } : undefined);
+  if (customer?.email) {
+    await notify(customer.email, "Your reading with Cherry Sage — payment received",
+      `<p>Thank you, ${esc(customer.full_name || "")}. Your payment for <strong>${esc(product.name)}</strong> on ${esc(when)} went through.</p>` +
+      `<p>Amount charged: ${money(product.price_cents)}</p>` +
+      `<p>Cherry will review and confirm your appointment shortly. You'll hear from her directly once it's confirmed.</p>`);
+  }
+
   return json({
     ok: true,
     orderId,
@@ -119,3 +138,24 @@ export default async (req) => {
     requestedStart: hold.requested_start,
   });
 };
+
+function esc(s) {
+  return String(s || "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+async function notify(to, subject, htmlContent, replyTo) {
+  const KEY = process.env.BREVO_KEY;
+  if (!KEY || !to) return;
+  try {
+    await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: { "api-key": KEY, "content-type": "application/json", accept: "application/json" },
+      body: JSON.stringify({
+        sender: { name: "Cherry Sage", email: "admin@cherrysage.com" },
+        to: [{ email: to }],
+        ...(replyTo ? { replyTo } : {}),
+        subject, htmlContent,
+      }),
+    });
+  } catch { /* non-fatal, matches the existing lead.mjs/comments.mjs notify pattern */ }
+}

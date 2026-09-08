@@ -5,6 +5,8 @@
 // own check is a fast-fail, not the actual security boundary.
 import { createClient } from "@supabase/supabase-js";
 
+const CLOVER_API_BASE = "https://api.clover.com";
+
 function json(o, status = 200) {
   return new Response(JSON.stringify(o), {
     status, headers: { "content-type": "application/json", "cache-control": "no-store" },
@@ -40,7 +42,8 @@ export default async (req) => {
     const id = String(d.id || "");
     const status = String(d.status || "");
     if (!id || !ALLOWED_STATUS.includes(status)) return json({ error: "bad request" }, 400);
-    const { error } = await supabase.rpc("admin_update_appointment", {
+
+    const { data, error } = await supabase.rpc("admin_update_appointment", {
       p_admin_key: d.key,
       p_id: id,
       p_status: status,
@@ -48,8 +51,93 @@ export default async (req) => {
       p_decision_note: d.note || null,
     });
     if (error) return json({ error: error.message }, 400);
-    return json({ ok: true });
+    const details = (data && data[0]) || null;
+
+    var refundResult = null;
+    if (status === "declined" && details?.clover_payment_id) {
+      refundResult = await refundCloverCharge(details.clover_payment_id, details.amount_cents);
+    }
+
+    if (details?.customer_email) {
+      await sendStatusEmail(details, status, refundResult);
+    }
+
+    return json({ ok: true, refund: refundResult });
   }
 
   return json({ error: "method" }, 405);
 };
+
+async function refundCloverCharge(chargeId, amountCents) {
+  const CLOVER_PRIVATE_TOKEN = process.env.CLOVER_PRIVATE_TOKEN;
+  if (!CLOVER_PRIVATE_TOKEN) return { attempted: false, reason: "not configured" };
+  try {
+    const res = await fetch(`${CLOVER_API_BASE}/v1/refunds`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${CLOVER_PRIVATE_TOKEN}`,
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+      body: JSON.stringify({ charge: chargeId, amount: amountCents, reason: "requested_by_customer" }),
+    });
+    const body = await res.json();
+    if (!res.ok || (body.status !== "succeeded" && body.status !== "pending")) {
+      return { attempted: true, succeeded: false, error: body?.message || "refund failed" };
+    }
+    return { attempted: true, succeeded: true, refundId: body.id, status: body.status };
+  } catch (e) {
+    return { attempted: true, succeeded: false, error: String(e) };
+  }
+}
+
+async function sendStatusEmail(details, status, refundResult) {
+  const when = fmt(details.requested_start);
+  const name = esc(details.customer_name || "");
+  let subject, body;
+
+  if (status === "approved") {
+    subject = "Your appointment with Cherry Sage is confirmed";
+    body = `<p>Great news, ${name}. Your <strong>${esc(details.product_name)}</strong> reading is confirmed for ${when}.</p>` +
+      `<p>Cherry looks forward to speaking with you.</p>`;
+  } else if (status === "alternate_offered") {
+    const alt = fmt(details.alternate_start);
+    subject = "A different time for your Cherry Sage reading";
+    body = `<p>Hi ${name}, your requested time (${when}) doesn't quite work, but Cherry can do <strong>${alt}</strong> instead.</p>` +
+      `<p>Reply to this email to confirm, or to find another time.</p>`;
+  } else if (status === "declined") {
+    subject = "Your Cherry Sage appointment request";
+    var refundLine = refundResult?.succeeded
+      ? "<p>Your payment has been refunded.</p>"
+      : "<p>We're processing your refund now, if you don't see it in a few business days please reply to this email.</p>";
+    body = `<p>Hi ${name}, unfortunately Cherry isn't able to make ${when} work.</p>` + refundLine +
+      `<p>Please feel free to request a different time whenever you're ready.</p>`;
+  } else {
+    return;
+  }
+
+  const KEY = process.env.BREVO_KEY;
+  if (!KEY) return;
+  try {
+    await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: { "api-key": KEY, "content-type": "application/json", accept: "application/json" },
+      body: JSON.stringify({
+        sender: { name: "Cherry Sage", email: "admin@cherrysage.com" },
+        to: [{ email: details.customer_email }],
+        subject, htmlContent: body,
+      }),
+    });
+  } catch { /* non-fatal */ }
+}
+
+function fmt(iso) {
+  if (!iso) return "";
+  return new Date(iso).toLocaleString("en-US", {
+    timeZone: "America/New_York", weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "2-digit",
+  }) + " Eastern";
+}
+
+function esc(s) {
+  return String(s || "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
