@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard — Cherry Sage</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500;1,600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site.css?v=39">
+<link rel="icon" href="assets/favicon.ico?v=2" sizes="any">
+<style>
+  .dash-wrap{max-width:1100px;margin:0 auto;padding:2.4rem 1.4rem 5rem}
+  .dash-gate{max-width:420px;margin:5rem auto;text-align:center;padding:2.4rem;background:var(--cream);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-sm)}
+  .dash-gate input{width:100%;padding:.85rem 1rem;border:1px solid var(--line-strong);border-radius:12px;font-family:var(--font-body);font-size:1rem;margin:1rem 0}
+  .dash-gate .msg{font-size:.88rem;margin-top:1rem;color:var(--ink-soft)}
+  .dash-gate .msg.err{color:var(--cherry)}
+  .dash-gate .msg.ok{color:var(--sage)}
+  .dash-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;margin-bottom:1.6rem}
+  .dash-header h1{margin:0;font-size:1.7rem}
+  .dash-who{font-size:.85rem;color:var(--ink-soft)}
+  .dash-who a{color:var(--cherry)}
+  .dash-tabs{display:flex;gap:.5rem;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-bottom:1.8rem;padding-bottom:0}
+  .dash-tab{padding:.7rem 1.1rem;border:none;background:none;font-family:var(--font-body);font-size:.95rem;color:var(--ink-soft);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+  .dash-tab.active{color:var(--oxblood);border-bottom-color:var(--oxblood);font-weight:600}
+  .dash-tab.soon{opacity:.5;cursor:default}
+  .dash-tab .badge{font-size:.68rem;background:var(--gold-soft);color:var(--oxblood-deep);padding:.1rem .4rem;border-radius:999px;margin-left:.35rem;vertical-align:middle}
+  .dash-panel{display:none}
+  .dash-panel.active{display:block}
+  .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1rem;margin-bottom:2rem}
+  .stat-card{background:var(--cream);border:1px solid var(--line);border-radius:var(--r);padding:1.2rem 1.3rem}
+  .stat-card .num{font-family:var(--font-display);font-size:2rem;color:var(--oxblood);line-height:1}
+  .stat-card .label{font-size:.82rem;color:var(--ink-soft);margin-top:.3rem}
+  .urgent-card{background:#fbeee6;border:1px solid #e4b590;border-radius:var(--r);padding:1.2rem 1.4rem;margin-bottom:1.6rem}
+  .urgent-card.calm{background:var(--paper-2);border-color:var(--line)}
+  .urgent-card h3{margin:0 0 .5rem;font-size:1.05rem}
+  .dash-section-title{font-size:1.15rem;margin:2rem 0 1rem;color:var(--oxblood-deep)}
+  table.dash-table{width:100%;border-collapse:collapse;font-size:.88rem}
+  table.dash-table th{text-align:left;padding:.6rem .8rem;color:var(--ink-soft);border-bottom:1px solid var(--line-strong);font-weight:600}
+  table.dash-table td{padding:.6rem .8rem;border-bottom:1px solid var(--line)}
+  table.dash-table a{color:var(--cherry)}
+  .empty-note{color:var(--ink-soft);font-size:.9rem;padding:1rem;text-align:center;background:var(--paper-2);border-radius:var(--r)}
+  .website-card{background:var(--cream);border:1px solid var(--line);border-radius:var(--r-lg);padding:2rem;text-align:center;max-width:520px;margin:1rem auto}
+  .website-card p{color:var(--ink-soft);margin:.6rem 0 1.4rem}
+  .sitemap-search{width:100%;max-width:360px;padding:.7rem 1rem;border:1px solid var(--line-strong);border-radius:999px;font-family:var(--font-body);margin-bottom:1.2rem}
+  .soon-note{color:var(--ink-soft);text-align:center;padding:3rem 1rem}
+</style>
+</head>
+<body>
+<div class="dash-wrap">
+
+  <div id="dashGate" class="dash-gate">
+    <p class="eyebrow">Cherry Sage</p>
+    <h1 style="font-size:1.5rem;margin:.2rem 0 1rem">Your Dashboard</h1>
+    <p style="color:var(--ink-soft);font-size:.92rem">Enter your email and we'll send you a one-click sign-in link. No password to remember.</p>
+    <input type="email" id="gateEmail" placeholder="you@cherrysage.com" autocomplete="email">
+    <button class="btn btn-primary" id="gateSend" style="width:100%">Send my sign-in link</button>
+    <p class="msg" id="gateMsg"></p>
+  </div>
+
+  <div id="dashApp" hidden>
+    <div class="dash-header">
+      <h1>Cherry Sage Dashboard</h1>
+      <div class="dash-who">Signed in as <strong id="whoEmail"></strong> · <a href="#" id="signOut">Sign out</a></div>
+    </div>
+
+    <div class="dash-tabs">
+      <button class="dash-tab active" data-tab="home">Home</button>
+      <button class="dash-tab" data-tab="website">Website</button>
+      <button class="dash-tab" data-tab="crm">CRM</button>
+      <button class="dash-tab" data-tab="sitemap">Sitemap</button>
+      <button class="dash-tab soon" disabled>Social <span class="badge">Coming soon</span></button>
+    </div>
+
+    <div class="dash-panel active" id="panel-home">
+      <div id="homeUrgent"></div>
+      <div class="stat-grid" id="homeStats"></div>
+      <h2 class="dash-section-title">Email marketing</h2>
+      <div id="homeBrevo"></div>
+    </div>
+
+    <div class="dash-panel" id="panel-website">
+      <div class="website-card">
+        <p class="eyebrow">Website backend</p>
+        <h2 style="margin:.2rem 0">Edit your pages</h2>
+        <p>Create new pages, edit text and photos on your Guest Articles, and manage your content, all from here.</p>
+        <a class="btn btn-gold" href="/editor-preview/admin/">Open your website editor</a>
+      </div>
+    </div>
+
+    <div class="dash-panel" id="panel-crm">
+      <h2 class="dash-section-title">Recent orders</h2>
+      <div id="crmOrders"></div>
+      <h2 class="dash-section-title">Pending appointment requests</h2>
+      <div id="crmAppointments"></div>
+      <h2 class="dash-section-title">Contact-form leads</h2>
+      <div id="crmLeads"></div>
+    </div>
+
+    <div class="dash-panel" id="panel-sitemap">
+      <input type="text" class="sitemap-search" id="sitemapSearch" placeholder="Search pages...">
+      <p style="color:var(--ink-soft);font-size:.85rem;margin-bottom:1rem" id="sitemapCount"></p>
+      <table class="dash-table"><thead><tr><th>Page</th><th>Last updated</th><th></th></tr></thead><tbody id="sitemapBody"></tbody></table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  var SUPABASE_URL='https://ctoeuikxoqlhnebgsygp.supabase.co';
+  var SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0b2V1aWt4b3FsaG5lYmdzeWdwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0ODM4NTMsImV4cCI6MjA5NjA1OTg1M30.Cy0uf8hm-Biea7a1V3bLQBz70f1oyhP83vHDjefTce8';
+  var gate=document.getElementById('dashGate'), app=document.getElementById('dashApp');
+  var gateMsg=document.getElementById('gateMsg');
+
+  function money(c){ return '$'+((c||0)/100).toFixed(2); }
+  function esc(s){ return String(s||'').replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+
+  // --- Handle magic-link callback (tokens arrive in the URL hash) ---
+  function parseHashTokens(){
+    var h=location.hash.replace(/^#/,'');
+    if(!h) return null;
+    var p=new URLSearchParams(h);
+    var at=p.get('access_token');
+    if(!at) return null;
+    return { access_token:at, refresh_token:p.get('refresh_token'), expires_at:p.get('expires_at') };
+  }
+  var incoming=parseHashTokens();
+  if(incoming){
+    sessionStorage.setItem('cs_dash_session', JSON.stringify(incoming));
+    history.replaceState(null,'',location.pathname);
+  }
+
+  function getSession(){
+    try{ return JSON.parse(sessionStorage.getItem('cs_dash_session')||'null'); }catch(e){ return null; }
+  }
+
+  async function tryEnterApp(){
+    var sess=getSession();
+    if(!sess||!sess.access_token) return false;
+    var res;
+    try{
+      res=await fetch('/.netlify/functions/dashboard-summary',{headers:{Authorization:'Bearer '+sess.access_token}});
+    }catch(e){ return false; }
+    if(res.status===401){ sessionStorage.removeItem('cs_dash_session'); return false; }
+    if(res.status===403){
+      gateMsg.className='msg err';
+      gateMsg.textContent="That email isn't set up for dashboard access yet. Ask RJ to add it.";
+      sessionStorage.removeItem('cs_dash_session');
+      return false;
+    }
+    if(!res.ok) return false;
+    var data=await res.json();
+    // pull the email out of the JWT for display, without needing a full auth SDK
+    var email='';
+    try{ email=JSON.parse(atob(sess.access_token.split('.')[1])).email||''; }catch(e){}
+    document.getElementById('whoEmail').textContent=email;
+    gate.hidden=true; app.hidden=false;
+    renderHome(data);
+    renderCrm(data);
+    loadSitemap();
+    return true;
+  }
+
+  document.getElementById('gateSend').addEventListener('click', async function(){
+    var email=document.getElementById('gateEmail').value.trim();
+    if(!email){ gateMsg.className='msg err'; gateMsg.textContent='Enter your email first.'; return; }
+    gateMsg.className='msg'; gateMsg.textContent='Sending...';
+    try{
+      var res=await fetch(SUPABASE_URL+'/auth/v1/otp',{
+        method:'POST',
+        headers:{apikey:SUPABASE_ANON,'Content-Type':'application/json'},
+        body:JSON.stringify({email:email, create_user:true, options:{email_redirect_to: location.origin+'/dashboard.html'}})
+      });
+      if(res.ok){
+        gateMsg.className='msg ok';
+        gateMsg.textContent='Check your email, we sent you a one-click sign-in link.';
+      }else{
+        gateMsg.className='msg err';
+        gateMsg.textContent='Could not send the link. Please try again.';
+      }
+    }catch(e){
+      gateMsg.className='msg err'; gateMsg.textContent='Could not reach the server. Please try again.';
+    }
+  });
+
+  document.getElementById('signOut').addEventListener('click', function(e){
+    e.preventDefault();
+    sessionStorage.removeItem('cs_dash_session');
+    location.reload();
+  });
+
+  document.querySelectorAll('.dash-tab:not(.soon)').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.dash-tab').forEach(function(b){ b.classList.remove('active'); });
+      document.querySelectorAll('.dash-panel').forEach(function(p){ p.classList.remove('active'); });
+      btn.classList.add('active');
+      document.getElementById('panel-'+btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  function renderHome(d){
+    var urgent=document.getElementById('homeUrgent');
+    if(d.pendingAppointments>0){
+      urgent.innerHTML='<div class="urgent-card"><h3>'+d.pendingAppointments+' appointment request'+(d.pendingAppointments===1?'':'s'
+        )+' waiting on you</h3><p style="margin:0"><a class="btn btn-primary" href="/appointments-dashboard.html">Review requests</a></p></div>';
+    }else{
+      urgent.innerHTML='<div class="urgent-card calm"><h3>All caught up</h3><p style="margin:0;color:var(--ink-soft)">No appointment requests waiting on you right now.</p></div>';
+    }
+    document.getElementById('homeStats').innerHTML=[
+      ['$' + ((d.revenueCentsAllTime||0)/100).toFixed(0), 'Revenue, all time'],
+      [d.paidOrders, 'Paid bookings'],
+      [d.totalCustomers, 'Customers'],
+      [d.activeProducts, 'Reading types for sale'],
+      [d.leads.total, 'Contact-form leads, all time'],
+      [d.leads.last30Days, 'New leads, last 30 days'],
+    ].map(function(s){ return '<div class="stat-card"><div class="num">'+esc(String(s[0]))+'</div><div class="label">'+esc(s[1])+'</div></div>'; }).join('');
+
+    var b=d.brevo||{};
+    var html='';
+    html+='<div class="stat-grid"><div class="stat-card"><div class="num">'+(b.contactCount==null?'—':b.contactCount)+'</div><div class="label">Email contacts</div></div></div>';
+    if(b.recentCampaigns && b.recentCampaigns.length){
+      html+='<table class="dash-table"><thead><tr><th>Campaign</th><th>Sent</th><th>Delivered</th><th>Opens</th><th>Clicks</th></tr></thead><tbody>';
+      b.recentCampaigns.forEach(function(c){
+        html+='<tr><td>'+esc(c.name)+'</td><td>'+esc((c.sentDate||'').slice(0,10))+'</td><td>'+(c.delivered??'—')+'</td><td>'+(c.opens??'—')+'</td><td>'+(c.clicks??'—')+'</td></tr>';
+      });
+      html+='</tbody></table>';
+    }else{
+      html+='<p class="empty-note">No sent campaigns yet.</p>';
+    }
+    document.getElementById('homeBrevo').innerHTML=html;
+  }
+
+  function renderCrm(d){
+    var orders=d.recentOrders||[];
+    document.getElementById('crmOrders').innerHTML = orders.length
+      ? '<table class="dash-table"><thead><tr><th>Customer</th><th>Reading</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody>'+
+        orders.map(function(o){ return '<tr><td>'+esc(o.customer_email||'—')+'</td><td>'+esc(o.product_name||'—')+'</td><td>'+money(o.amount_cents)+'</td><td>'+esc(o.status)+'</td><td>'+esc((o.created_at||'').slice(0,10))+'</td></tr>'; }).join('')+
+        '</tbody></table>'
+      : '<p class="empty-note">No orders yet — nothing has come through checkout so far.</p>';
+
+    var appts=d.pendingAppointmentDetails||[];
+    document.getElementById('crmAppointments').innerHTML = appts.length
+      ? '<table class="dash-table"><thead><tr><th>Customer</th><th>Requested time</th></tr></thead><tbody>'+
+        appts.map(function(a){ return '<tr><td>'+esc(a.customer_name||a.customer_email||'—')+'</td><td>'+esc((a.requested_start||'').replace('T',' ').slice(0,16))+'</td></tr>'; }).join('')+
+        '</tbody></table>'
+      : '<p class="empty-note">Nothing pending right now.</p>';
+
+    document.getElementById('crmLeads').innerHTML = '<p class="empty-note">'+d.leads.total+' total contact-form submissions, '+d.leads.last30Days+' in the last 30 days.</p>';
+  }
+
+  var sitemapPages=[];
+  async function loadSitemap(){
+    try{
+      var res=await fetch('/sitemap.xml');
+      var xml=await res.text();
+      var doc=new DOMParser().parseFromString(xml,'text/xml');
+      var urls=[].slice.call(doc.getElementsByTagName('url'));
+      sitemapPages=urls.map(function(u){
+        return {
+          loc:u.getElementsByTagName('loc')[0]?.textContent||'',
+          lastmod:u.getElementsByTagName('lastmod')[0]?.textContent||'',
+        };
+      }).sort(function(a,b){ return a.loc.localeCompare(b.loc); });
+      document.getElementById('sitemapCount').textContent=sitemapPages.length+' pages on your site';
+      renderSitemap(sitemapPages);
+    }catch(e){
+      document.getElementById('sitemapCount').textContent='Could not load the sitemap.';
+    }
+  }
+  function renderSitemap(list){
+    document.getElementById('sitemapBody').innerHTML=list.map(function(p){
+      var name=p.loc.replace('https://cherrysage.com/','').replace(/\.html$/,'')||'Home';
+      return '<tr><td>'+esc(name)+'</td><td>'+esc(p.lastmod)+'</td><td><a href="'+esc(p.loc)+'" target="_blank" rel="noopener">View →</a></td></tr>';
+    }).join('');
+  }
+  document.getElementById('sitemapSearch').addEventListener('input', function(){
+    var q=this.value.toLowerCase();
+    renderSitemap(sitemapPages.filter(function(p){ return p.loc.toLowerCase().indexOf(q)>-1; }));
+  });
+
+  tryEnterApp();
+})();
+</script>
+</body>
+</html>
