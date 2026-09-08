@@ -65,9 +65,9 @@ export default async (req) => {
   }
 
   // Submit the real charge to Clover.
-  let charge;
+  let charge, cloverRes, raw;
   try {
-    const cloverRes = await fetch(`${CLOVER_API_BASE}/v1/charges`, {
+    cloverRes = await fetch(`${CLOVER_API_BASE}/v1/charges`, {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${CLOVER_PRIVATE_TOKEN}`,
@@ -82,12 +82,13 @@ export default async (req) => {
         description: `Cherry Sage — ${product.name}`,
       }),
     });
-    charge = await cloverRes.json();
-    if (!cloverRes.ok) {
-      return json({ error: charge?.message || "Card was declined. Please try a different card." }, 402);
-    }
   } catch {
     return json({ error: "Could not reach the payment processor. Please try again." }, 502);
+  }
+  raw = await cloverRes.text();
+  try { charge = raw ? JSON.parse(raw) : {}; } catch { charge = {}; }
+  if (!cloverRes.ok) {
+    return json({ error: charge?.message || raw?.slice(0, 200) || "Card was declined. Please try a different card." }, 402);
   }
 
   if (charge.status !== "succeeded" || charge.paid !== true) {

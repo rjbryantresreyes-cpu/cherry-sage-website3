@@ -81,9 +81,11 @@ async function refundCloverCharge(chargeId, amountCents) {
       },
       body: JSON.stringify({ charge: chargeId, amount: amountCents, reason: "requested_by_customer" }),
     });
-    const body = await res.json();
+    const raw = await res.text();
+    let body = {};
+    try { body = raw ? JSON.parse(raw) : {}; } catch { /* non-JSON response, fall through with raw text below */ }
     if (!res.ok || (body.status !== "succeeded" && body.status !== "pending")) {
-      return { attempted: true, succeeded: false, error: body?.message || "refund failed" };
+      return { attempted: true, succeeded: false, error: body?.message || raw?.slice(0, 200) || `refund failed (HTTP ${res.status})` };
     }
     return { attempted: true, succeeded: true, refundId: body.id, status: body.status };
   } catch (e) {
