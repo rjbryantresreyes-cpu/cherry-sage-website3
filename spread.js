@@ -51,7 +51,7 @@
     POS.forEach(function(pos,i){
       var col=document.createElement('div'); col.className='sp-col';
       col.innerHTML='<p class="sp-pos">'+pos.key+'</p><p class="sp-sub">'+pos.sub+'</p>';
-      var c=document.createElement('button'); c.className='t-card-back sp-card'; c.type='button';
+      var c=document.createElement('button'); c.className='sp-card-back sp-card'; c.type='button';
       c.setAttribute('aria-label','Turn your '+pos.key+' card'); c.innerHTML='<span>✦</span>';
       c.addEventListener('click',function(){ flip(c,i); });
       col.appendChild(c); spread.appendChild(col);
