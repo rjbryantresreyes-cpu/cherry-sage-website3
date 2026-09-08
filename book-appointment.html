@@ -39,22 +39,23 @@
   </div>
 </header>
 <main>
-<section class="page-hero banner"><div class="ph-glow" aria-hidden="true"></div><div class="ph-stars" aria-hidden="true"></div><div class="wrap reveal"><p class="eyebrow">Pick a time that works</p><h1>Request a Time</h1><p class="lede">Tell Cherry your preferred date and time, and she'll confirm by email or phone. No account needed.</p></div></section>
+<section class="page-hero banner"><div class="ph-glow" aria-hidden="true"></div><div class="ph-stars" aria-hidden="true"></div><div class="wrap reveal"><p class="eyebrow">Pick a time that works</p><h1>Request a Time</h1><p class="lede">Choose from Cherry's real open times below. She'll confirm your request by email or phone.</p></div></section>
 <section class="section"><div class="wrap story-grid">
   <div class="reveal">
     <h2>How this works</h2>
-    <p>Send your preferred date, time, and the kind of reading you're after. Cherry checks it against her schedule and confirms directly with you by email or phone, usually within a day.</p>
+    <p>Pick an open date and time below, then tell Cherry a bit about what you're after. She checks the request and confirms directly with you by email or phone, usually within a day.</p>
     <p>This is a request, not an instant booking, so your exact time isn't guaranteed until she confirms. If you'd rather just call when she's online, watch the status light at the corner of any page instead.</p>
     <p style="margin-top:1rem"><a href="/shop" style="color:var(--ink-soft);text-decoration:underline">Prefer to just buy minutes instead of scheduling? Go to Shop →</a></p>
   </div>
   <form id="apptForm" class="story-card reveal" style="display:grid;gap:.8rem">
+    <label style="display:grid;gap:.3rem;font-size:.85rem;color:var(--ink-soft)">Date
+      <input type="date" id="apptDate" name="date" required aria-label="Choose a date" style="padding:.8rem 1rem;border:1px solid var(--line-strong);border-radius:12px;font-family:var(--font-body)">
+    </label>
+    <div id="apptSlots" aria-live="polite"><p style="color:var(--ink-soft);font-size:.9rem;margin:0">Choose a date to see open times.</p></div>
+    <input type="hidden" name="slotIso" id="apptSlotIso">
     <input type="text" name="name" placeholder="Your name" required style="padding:.8rem 1rem;border:1px solid var(--line-strong);border-radius:12px;font-family:var(--font-body)">
     <input type="email" name="email" placeholder="Your email" required style="padding:.8rem 1rem;border:1px solid var(--line-strong);border-radius:12px;font-family:var(--font-body)">
     <input type="tel" name="phone" placeholder="Phone (optional)" style="padding:.8rem 1rem;border:1px solid var(--line-strong);border-radius:12px;font-family:var(--font-body)">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem">
-      <input type="date" name="date" required aria-label="Preferred date" style="padding:.8rem 1rem;border:1px solid var(--line-strong);border-radius:12px;font-family:var(--font-body)">
-      <input type="time" name="apptTime" required aria-label="Preferred time" style="padding:.8rem 1rem;border:1px solid var(--line-strong);border-radius:12px;font-family:var(--font-body)">
-    </div>
     <select name="readingType" required style="padding:.8rem 1rem;border:1px solid var(--line-strong);border-radius:12px;font-family:var(--font-body);background:#fff">
       <option value="">What kind of reading?</option>
       <option>Psychic Reading</option>
@@ -67,15 +68,57 @@
     <button class="btn btn-primary" type="submit">Request This Time</button>
     <p id="apptNote" style="margin:0;color:var(--cherry);font-size:.9rem" hidden></p>
   </form>
+  <style>
+  .slot-btn{padding:.55rem .9rem;border:1px solid var(--line-strong);border-radius:999px;background:#fff;cursor:pointer;font-size:.88rem;font-family:var(--font-body)}
+  .slot-btn:hover{border-color:var(--gold)}
+  .slot-btn.on{background:var(--oxblood);border-color:var(--oxblood);color:#fff}
+  .slot-grid{display:flex;flex-wrap:wrap;gap:.5rem;max-height:220px;overflow-y:auto;padding:.2rem 0}
+  </style>
   <script>
-  (function(){var f=document.getElementById('apptForm');if(!f)return;var t0=Date.now();
+  (function(){
+    var f=document.getElementById('apptForm');if(!f)return;var t0=Date.now();
+    var dateInput=document.getElementById('apptDate'), slotsBox=document.getElementById('apptSlots'), slotIsoField=document.getElementById('apptSlotIso');
+
+    var today=new Date();
+    var min=new Date(today.getTime()+24*3600000);
+    var max=new Date(today.getTime()+30*24*3600000);
+    function iso(d){return d.toISOString().slice(0,10);}
+    dateInput.min=iso(min); dateInput.max=iso(max);
+
+    function fmtSlot(isoStr){
+      return new Date(isoStr).toLocaleString('en-US',{timeZone:'America/New_York',hour:'numeric',minute:'2-digit'});
+    }
+
+    dateInput.addEventListener('change',function(){
+      slotIsoField.value='';
+      if(!dateInput.value){ slotsBox.innerHTML='<p style="color:var(--ink-soft);font-size:.9rem;margin:0">Choose a date to see open times.</p>'; return; }
+      slotsBox.innerHTML='<p style="color:var(--ink-soft);font-size:.9rem;margin:0">Loading open times…</p>';
+      fetch('/.netlify/functions/scheduler-availability?date='+dateInput.value+'&duration=15')
+        .then(function(r){return r.json();})
+        .then(function(d){
+          var slots=d.slots||[];
+          if(!slots.length){ slotsBox.innerHTML='<p style="color:var(--ink-soft);font-size:.9rem;margin:0">'+(d.reason==='day unavailable'?'Cherry is not taking appointments that day.':'No open times that day, try another date.')+'</p>'; return; }
+          slotsBox.innerHTML='<div class="slot-grid">'+slots.map(function(s){
+            return '<button type="button" class="slot-btn" data-iso="'+s+'">'+fmtSlot(s)+'</button>';
+          }).join('')+'</div>';
+        })
+        .catch(function(){ slotsBox.innerHTML='<p style="color:var(--cherry);font-size:.9rem;margin:0">Could not load open times, please try again.</p>'; });
+    });
+
+    slotsBox.addEventListener('click',function(e){
+      var btn=e.target.closest('.slot-btn'); if(!btn) return;
+      slotsBox.querySelectorAll('.slot-btn').forEach(function(b){b.classList.remove('on');});
+      btn.classList.add('on');
+      slotIsoField.value=btn.getAttribute('data-iso');
+    });
+
     f.addEventListener('submit',function(e){e.preventDefault();
       var note=document.getElementById('apptNote'),btn=f.querySelector('button');
       var email=(f.email.value||'').trim();
       if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){note.hidden=false;note.textContent='Please enter a valid email address.';return;}
-      if(!f.date.value||!f.apptTime.value||!f.readingType.value){note.hidden=false;note.textContent='Please fill in a date, time, and reading type.';return;}
+      if(!slotIsoField.value||!f.readingType.value){note.hidden=false;note.textContent='Please pick an open time and a reading type.';return;}
       btn.disabled=true;btn.textContent='Sending...';
-      var details='Preferred date: '+f.date.value+'\nPreferred time: '+f.apptTime.value+'\nReading type: '+f.readingType.value+
+      var details='Requested time: '+fmtSlot(slotIsoField.value)+' Eastern, on '+dateInput.value+' ('+slotIsoField.value+')\nReading type: '+f.readingType.value+
         (f.phone.value?('\nPhone: '+f.phone.value.trim()):'')+
         (f.message.value.trim()?('\n\nNotes: '+f.message.value.trim()):'');
       fetch('/.netlify/functions/lead',{method:'POST',headers:{'Content-Type':'application/json'},
