@@ -3,6 +3,37 @@
 // GET /.netlify/functions/scheduler-availability?date=YYYY-MM-DD&duration=15
 import { createClient } from "@supabase/supabase-js";
 
+// Bev's actual business hours are wall-clock time in her own timezone, not UTC (same
+// assumption schedule.mjs already makes for the "Cherry is Online" status widget). A date
+// like Nov 1 2026 sits on the far side of a US DST change from Sept 8, so a fixed UTC offset
+// would quietly go an hour wrong twice a year -- convert per-request using the real IANA zone
+// instead of hardcoding an offset. Deliberately avoids the common `new Date(str.toLocaleString(...))`
+// round-trip trick -- that depends on the RUNNING SERVER's own local timezone to parse the
+// intermediate string, which is not something to assume (verified this by hand: it silently
+// produced a result 8 hours off when tested on a machine set to Asia/Manila). This version
+// only uses Intl.DateTimeFormat's own timezone database, so it's correct regardless of what
+// timezone the server itself happens to be running in.
+const BUSINESS_TZ = "America/New_York";
+
+function getOffsetMinutes(instant, timeZone) {
+  const dtf = new Intl.DateTimeFormat("en-US", {
+    timeZone, hourCycle: "h23",
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit",
+  });
+  const parts = Object.fromEntries(dtf.formatToParts(instant).map((p) => [p.type, p.value]));
+  const asUTC = Date.UTC(+parts.year, +parts.month - 1, +parts.day, +parts.hour, +parts.minute, +parts.second);
+  return (asUTC - instant.getTime()) / 60000;
+}
+
+function zonedTimeToUtc(dateStr, timeStr, timeZone) {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const [hh, mm] = timeStr.split(":").map(Number);
+  const guess = new Date(Date.UTC(y, m - 1, d, hh, mm));
+  const offset = getOffsetMinutes(guess, timeZone);
+  return new Date(guess.getTime() - offset * 60000);
+}
+
 function json(obj, status = 200) {
   return new Response(JSON.stringify(obj), {
     status,
@@ -66,12 +97,10 @@ export default async (req) => {
 
   // Build candidate slots every `duration` minutes across the working window,
   // then ask the DB which ones are actually free (checks appointments + holds + buffer).
-  const [sh, sm] = startTime.split(":").map(Number);
-  const [eh, em] = endTime.split(":").map(Number);
-  const dayStart = new Date(date);
-  dayStart.setUTCHours(sh, sm, 0, 0);
-  const dayEnd = new Date(date);
-  dayEnd.setUTCHours(eh, em, 0, 0);
+  // start_time/end_time are wall-clock in BUSINESS_TZ, so convert per-request rather than
+  // treating them as UTC directly (see zonedTimeToUtc above).
+  const dayStart = zonedTimeToUtc(dateStr, startTime.slice(0, 5), BUSINESS_TZ);
+  const dayEnd = zonedTimeToUtc(dateStr, endTime.slice(0, 5), BUSINESS_TZ);
 
   const earliestBookable = new Date(Date.now() + earliestMinutes * 60000);
   const slots = [];
