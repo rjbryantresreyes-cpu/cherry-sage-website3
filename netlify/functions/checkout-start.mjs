@@ -13,10 +13,6 @@ function json(o, status = 200) {
   });
 }
 
-function randomPassword() {
-  return crypto.randomUUID() + crypto.randomUUID();
-}
-
 export default async (req) => {
   if (req.method !== "POST") return json({ error: "method" }, 405);
 
@@ -58,26 +54,13 @@ export default async (req) => {
   });
   if (!stillAvailable) return json({ error: "slot no longer available" }, 409);
 
-  // Find or create the customer. A brand-new customer gets a real Supabase Auth user under
-  // the hood (random password they never need to know -- they can use "forgot password" later
-  // if they ever want to sign in and see their booking) so the customers.id FK is satisfiable.
-  const { data: existing } = await supabase.from("customers").select("id").eq("email", email).maybeSingle();
-  let customerId = existing?.id;
-
-  if (!customerId) {
-    const { data: signUpData, error: signUpErr } = await supabase.auth.signUp({
-      email, password: randomPassword(),
-      options: { data: { full_name: fullName } },
-    });
-    if (signUpErr || !signUpData?.user?.id) {
-      return json({ error: "could not create account: " + (signUpErr?.message || "unknown") }, 500);
-    }
-    customerId = signUpData.user.id;
-    const { error: custErr } = await supabase.rpc("create_customer_if_missing", {
-      p_id: customerId, p_email: email, p_full_name: fullName, p_phone: phone || null,
-    });
-    if (custErr) return json({ error: "could not save customer: " + custErr.message }, 500);
-  }
+  // Find or create the customer. No Supabase Auth account is created here -- customers is
+  // independent of auth.users (see 2026-09-09 migration note). A real login/account portal is
+  // a separate, deliberate future feature, not something forced on every booking.
+  const { data: customerId, error: custErr } = await supabase.rpc("create_customer_if_missing", {
+    p_email: email, p_full_name: fullName, p_phone: phone || null,
+  });
+  if (custErr || !customerId) return json({ error: "could not save customer: " + (custErr?.message || "unknown") }, 500);
 
   const { data: holdId, error: holdErr } = await supabase.rpc("create_slot_hold", {
     p_start: slotIso, p_duration_minutes: durationMinutes, p_hold_seconds: 600,
