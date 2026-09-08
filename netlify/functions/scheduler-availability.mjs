@@ -22,7 +22,7 @@ export default async (req) => {
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
     return json({ fallback: true, slots: [] });
   }
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { db: { schema: "cherry_sage" } });
 
   const date = new Date(dateStr + "T00:00:00Z");
   const dayOfWeek = date.getUTCDay();
