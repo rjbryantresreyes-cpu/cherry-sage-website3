@@ -76,17 +76,32 @@
         <dt>Price</dt><dd id="ckSumPrice"></dd>
       </div>
       <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
-      <button class="btn btn-primary" type="submit">Reserve This Time</button>
+      <button class="btn btn-primary" type="submit">Continue to Payment</button>
       <p id="ckNote" class="ck-note" hidden></p>
     </form>
   </div>
 
+  <div class="ck-step ck-locked" id="ckStepPay">
+    <h2><span class="ck-step-num">4</span>Payment</h2>
+    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 1rem" id="ckHoldNote"></p>
+    <div style="display:grid;gap:.7rem;max-width:420px">
+      <div><label style="display:block;font-size:.8rem;color:var(--ink-soft);margin-bottom:.3rem">Card number</label><div id="ckCardNumber" class="ck-field" style="min-height:44px"></div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
+        <div><label style="display:block;font-size:.8rem;color:var(--ink-soft);margin-bottom:.3rem">Expiry</label><div id="ckCardDate" class="ck-field" style="min-height:44px"></div></div>
+        <div><label style="display:block;font-size:.8rem;color:var(--ink-soft);margin-bottom:.3rem">CVV</label><div id="ckCardCvv" class="ck-field" style="min-height:44px"></div></div>
+      </div>
+      <div><label style="display:block;font-size:.8rem;color:var(--ink-soft);margin-bottom:.3rem">Postal code</label><div id="ckCardPostal" class="ck-field" style="min-height:44px"></div></div>
+    </div>
+    <button class="btn btn-gold" id="ckPayBtn" type="button" style="margin-top:1.2rem">Pay &amp; Confirm Booking</button>
+    <p id="ckPayNote" class="ck-note" hidden></p>
+  </div>
+
   <div class="ck-step" id="ckStepDone" hidden>
     <div class="card reveal" style="text-align:center;border-color:var(--gold)">
-      <p class="eyebrow">You're reserved</p>
-      <h2>Your time is held for 10 minutes</h2>
+      <p class="eyebrow">You're booked</p>
+      <h2>Payment received</h2>
       <p class="pull-refl" id="ckDoneText"></p>
-      <p style="color:var(--ink-soft);font-size:.9rem">Cherry's team will reach out shortly to finish payment and confirm your appointment. If anything's off, just reply to that message.</p>
+      <p style="color:var(--ink-soft);font-size:.9rem">Cherry will review and confirm your appointment shortly. You'll hear from her directly.</p>
     </div>
   </div>
 
@@ -110,6 +125,7 @@
   <span class="cw-status"><span class="status-dot"></span>Cherry is Online</span>
   <span class="cw-bubble"><img src="assets/mark-clean.png" alt=""></span>
 </div>
+<script src="https://checkout.clover.com/sdk.js"></script>
 <script>
 (function(){
   var SUPABASE_URL='https://ctoeuikxoqlhnebgsygp.supabase.co';
@@ -198,16 +214,71 @@
     .then(function(res){
       if(!res.ok||!res.data.ok){
         note.hidden=false; note.textContent=(res.data&&res.data.error==='slot no longer available')?'That time was just taken, please pick another.':'Something went wrong, please try again.';
-        btn.disabled=false; btn.textContent='Reserve This Time';
+        btn.disabled=false; btn.textContent='Continue to Payment';
         return;
       }
-      document.querySelectorAll('.ck-step').forEach(function(s){ if(s.id!=='ckStepDone') s.hidden=true; });
-      document.getElementById('ckStepDone').hidden=false;
-      document.getElementById('ckDoneText').textContent=selectedProduct.name+' on '+fmtSlot(selectedSlotIso)+' Eastern, held for the next 10 minutes.';
-      document.getElementById('ckStepDone').scrollIntoView({behavior:'smooth',block:'center'});
+      currentHold={holdId:res.data.holdId, customerId:res.data.customerId, expiresInSeconds:res.data.expiresInSeconds};
+      stepInfo.hidden=true;
+      var payStep=document.getElementById('ckStepPay');
+      payStep.classList.remove('ck-locked'); payStep.hidden=false;
+      document.getElementById('ckHoldNote').textContent='Your time is held for the next 10 minutes while you pay. '+selectedProduct.name+', '+money(selectedProduct.priceCents)+'.';
+      initCloverFields();
+      payStep.scrollIntoView({behavior:'smooth',block:'center'});
     }).catch(function(){
       note.hidden=false; note.textContent='Something went wrong, please try again.';
-      btn.disabled=false; btn.textContent='Reserve This Time';
+      btn.disabled=false; btn.textContent='Continue to Payment';
+    });
+  });
+
+  // ---- Payment (Clover hosted card fields) ----
+  var CLOVER_PUBLIC_TOKEN='9cfc3848689bc857cafbfaa1f97b69a4';
+  var CLOVER_MERCHANT_ID='266062678880';
+  var currentHold=null, cloverInstance=null, cloverCardNumber=null, cloverFieldsReady=false;
+
+  function initCloverFields(){
+    if(cloverFieldsReady) return;
+    cloverFieldsReady=true;
+    if(!window.Clover){ document.getElementById('ckPayNote').hidden=false; document.getElementById('ckPayNote').textContent='Payment form could not load, please refresh the page.'; return; }
+    cloverInstance=new Clover(CLOVER_PUBLIC_TOKEN,{merchantId:CLOVER_MERCHANT_ID});
+    var elements=cloverInstance.elements();
+    cloverCardNumber=elements.create('CARD_NUMBER');
+    var cardDate=elements.create('CARD_DATE');
+    var cardCvv=elements.create('CARD_CVV');
+    var cardPostal=elements.create('CARD_POSTAL_CODE');
+    cloverCardNumber.mount('#ckCardNumber');
+    cardDate.mount('#ckCardDate');
+    cardCvv.mount('#ckCardCvv');
+    cardPostal.mount('#ckCardPostal');
+  }
+
+  document.getElementById('ckPayBtn').addEventListener('click',function(){
+    var payNote=document.getElementById('ckPayNote'), payBtn=this;
+    if(!currentHold){ payNote.hidden=false; payNote.textContent='Something went wrong, please start over.'; return; }
+    if(!cloverInstance){ payNote.hidden=false; payNote.textContent='Payment form is not ready yet, please wait a moment and try again.'; return; }
+    payNote.hidden=true; payBtn.disabled=true; payBtn.textContent='Processing…';
+    cloverInstance.createToken().then(function(result){
+      if(result.errors||!result.token){
+        payNote.hidden=false; payNote.textContent='Please check your card details and try again.';
+        payBtn.disabled=false; payBtn.textContent='Pay & Confirm Booking';
+        return;
+      }
+      return fetch('/.netlify/functions/checkout-charge',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+        holdId:currentHold.holdId, customerId:currentHold.customerId, readingProductId:selectedProduct.id, cardToken:result.token
+      })}).then(function(r){return r.json().then(function(d){return {ok:r.ok, data:d};});})
+      .then(function(res){
+        if(!res.ok||!res.data.ok){
+          payNote.hidden=false; payNote.textContent=(res.data&&res.data.error)||'Payment could not be completed, please try again.';
+          payBtn.disabled=false; payBtn.textContent='Pay & Confirm Booking';
+          return;
+        }
+        document.querySelectorAll('.ck-step').forEach(function(s){ if(s.id!=='ckStepDone') s.hidden=true; });
+        document.getElementById('ckStepDone').hidden=false;
+        document.getElementById('ckDoneText').textContent=res.data.product.name+' on '+fmtSlot(res.data.requestedStart)+' Eastern. '+money(res.data.product.priceCents)+' charged.';
+        document.getElementById('ckStepDone').scrollIntoView({behavior:'smooth',block:'center'});
+      });
+    }).catch(function(){
+      payNote.hidden=false; payNote.textContent='Something went wrong, please try again.';
+      payBtn.disabled=false; payBtn.textContent='Pay & Confirm Booking';
     });
   });
 })();
