@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Book Your Reading — Cherry Sage</title>
+<meta name="description" content="Choose your reading, pick a real open time, and reserve your spot with Cherry Sage.">
+<link rel="canonical" href="https://cherrysage.com/checkout-appointment.html">
+<meta name="robots" content="noindex,follow">
+<meta name="theme-color" content="#6E1A28">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500;1,600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site.css?v=37">
+<link rel="icon" href="assets/favicon.ico?v=2" sizes="any">
+<link rel="icon" href="assets/icon-32.png?v=2" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="assets/icon-180.png?v=2">
+<style>
+.ck-wrap{max-width:640px;margin:0 auto}
+.ck-step{margin-bottom:2.2rem;padding-bottom:2.2rem;border-bottom:1px solid var(--line)}
+.ck-step:last-child{border-bottom:0}
+.ck-step-num{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:var(--oxblood);color:#fff;font-size:.85rem;font-weight:700;margin-right:.6rem;flex-shrink:0}
+.ck-step h2{display:flex;align-items:center;font-size:1.2rem;margin:0 0 1rem}
+.ck-products{display:grid;gap:.7rem}
+.ck-product{display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:1rem 1.2rem;border:1px solid var(--line-strong);border-radius:12px;cursor:pointer;background:#fff;text-align:left}
+.ck-product:hover{border-color:var(--gold)}
+.ck-product.on{border-color:var(--oxblood);background:var(--paper-2);box-shadow:0 0 0 1px var(--oxblood)}
+.ck-product-name{font-weight:600;color:var(--oxblood)}
+.ck-product-sub{font-size:.82rem;color:var(--ink-soft)}
+.ck-product-price{font-weight:700;color:var(--gold);font-size:1.05rem;white-space:nowrap}
+.ck-field{padding:.8rem 1rem;border:1px solid var(--line-strong);border-radius:12px;font-family:var(--font-body);width:100%}
+.ck-summary{background:var(--paper-2);border:1px solid var(--line);border-radius:12px;padding:1.2rem 1.4rem;margin-bottom:1.2rem}
+.ck-summary dt{font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);margin-top:.6rem}
+.ck-summary dt:first-child{margin-top:0}
+.ck-summary dd{margin:.1rem 0 0;font-weight:600;color:var(--ink)}
+.ck-note{font-size:.85rem;color:var(--cherry);margin-top:.6rem}
+.ck-locked{opacity:.4;pointer-events:none}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap nav-row">
+    <a aria-label='Cherry Sage home' class='brand' href='/'><img src="assets/logo-horizontal.png" alt="Cherry Sage — Psychic, Tarot, Numerology"></a>
+    <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false">&#9776;</button>
+    <nav class="primary-nav" id="primaryNav" aria-label="Primary">
+      <ul><li><a href="/meet">Meet Cherry</a></li><li class="has-dropdown"><a href="/psychic-reading">Readings</a><ul class="dropdown"><li><a href="/psychic-reading">Psychic Reading</a></li><li><a href="/tarot">Tarot Card Reading</a></li><li><a href="/book-appointment">Request a Time</a></li></ul></li><li class="has-dropdown"><a href="/numerology">Numerology</a><ul class="dropdown"><li><a href="/free-karmic-reading">Free Numerology Reading</a></li></ul></li><li class="has-dropdown"><a href="/testimonials">Reviews</a><ul class="dropdown"><li><a href="/feedback">Leave Feedback</a></li></ul></li><li class="has-dropdown"><a href="/blog">Blog</a><ul class="dropdown"><li><a href="/articles">Guest Articles</a></li><li><a href="/tarot-pull">Free Tarot Pull</a></li><li><a href="/tarot-spread">Free Tarot Spread</a></li><li><a href="/life-path">Life Path Calculator</a></li><li><a href="/horoscope">Daily Horoscope</a></li></ul></li><li><a href="/contact">Contact</a></li><li class="has-dropdown"><a href="/account" class="nav-utility">My Account</a><ul class="dropdown"><li><a href="https://shop.cherrysage.com/my-account/" target="_blank" rel="noopener">Sign In</a></li></ul></li></ul>
+      <a class='btn btn-primary' href='/shop'>Book a Reading</a>
+    </nav>
+  </div>
+</header>
+<main>
+<section class="page-hero banner"><div class="ph-glow" aria-hidden="true"></div><div class="ph-stars" aria-hidden="true"></div><div class="wrap reveal"><p class="eyebrow">Preview build &middot; Book a reading</p><h1>Book Your Reading</h1><p class="lede">Choose your reading, pick a real open time, and reserve your spot. This preview reserves your time; the payment step is being finished now.</p></div></section>
+<section class="section"><div class="wrap ck-wrap">
+
+  <div class="ck-step" id="ckStepProduct">
+    <h2><span class="ck-step-num">1</span>Choose your reading</h2>
+    <div class="ck-products" id="ckProducts"><p style="color:var(--ink-soft)">Loading readings…</p></div>
+  </div>
+
+  <div class="ck-step ck-locked" id="ckStepTime">
+    <h2><span class="ck-step-num">2</span>Choose a time</h2>
+    <label style="display:grid;gap:.3rem;font-size:.85rem;color:var(--ink-soft);margin-bottom:1rem">Date
+      <input type="date" id="ckDate" class="ck-field" aria-label="Choose a date">
+    </label>
+    <div id="ckSlots"><p style="color:var(--ink-soft);font-size:.9rem;margin:0">Choose a reading above first.</p></div>
+  </div>
+
+  <div class="ck-step ck-locked" id="ckStepInfo">
+    <h2><span class="ck-step-num">3</span>Your information</h2>
+    <form id="ckForm" style="display:grid;gap:.8rem">
+      <input type="text" name="name" placeholder="Your name" required class="ck-field">
+      <input type="email" name="email" placeholder="Your email" required class="ck-field">
+      <input type="tel" name="phone" placeholder="Phone (optional)" class="ck-field">
+      <div class="ck-summary" id="ckSummary" hidden>
+        <dt>Reading</dt><dd id="ckSumProduct"></dd>
+        <dt>When</dt><dd id="ckSumTime"></dd>
+        <dt>Price</dt><dd id="ckSumPrice"></dd>
+      </div>
+      <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
+      <button class="btn btn-primary" type="submit">Reserve This Time</button>
+      <p id="ckNote" class="ck-note" hidden></p>
+    </form>
+  </div>
+
+  <div class="ck-step" id="ckStepDone" hidden>
+    <div class="card reveal" style="text-align:center;border-color:var(--gold)">
+      <p class="eyebrow">You're reserved</p>
+      <h2>Your time is held for 10 minutes</h2>
+      <p class="pull-refl" id="ckDoneText"></p>
+      <p style="color:var(--ink-soft);font-size:.9rem">Cherry's team will reach out shortly to finish payment and confirm your appointment. If anything's off, just reply to that message.</p>
+    </div>
+  </div>
+
+</div></section>
+</main>
+<footer class="footer">
+  <div class="wrap footer-grid">
+    <div>
+      <div class="footer-brand"><img src="assets/mark-clean.png" alt=""><span>Cherry Sage</span></div>
+      <p style="font-size:.9rem">Honest, accurate psychic, tarot, and numerology readings by phone. Trusted since 1999.</p>
+    </div>
+    <div><h4>Readings</h4><ul><li><a href="/psychic-reading">Psychic Reading</a></li><li><a href="/tarot">Tarot Card Reading</a></li><li><a href="/numerology">Numerology</a></li><li><a href="/how-it-works">How It Works</a></li></ul></div>
+    <div><h4>Explore</h4><ul><li><a href="/meet">Meet Cherry</a></li><li><a href="/blog">Blog</a></li><li><a href="/articles">Guest Articles</a></li><li><a href="/testimonials">Testimonials</a></li><li><a href="/policies">Policies</a></li></ul></div>
+    <div><h4>Free</h4><ul><li><a href="/tarot-pull">Free Tarot Pull</a></li><li><a href="/tarot-spread">Free Tarot Spread</a></li><li><a href="/life-path">Life Path Calculator</a></li><li><a href="/free-karmic-reading">Karmic Accumulation</a></li><li><a href="/horoscope">Daily Horoscope</a></li><li><a href="/feedback">Leave Feedback</a></li></ul></div>
+  </div>
+  <div class="wrap footer-signup"><h4>Cherry's Newsletter</h4><p class="nl-lede">Honest insight on the psychic path, numerology, and tarot, straight to your inbox. No spam, unsubscribe any time.</p><form class="nl-form" novalidate><input type="email" placeholder="Your email" aria-label="Your email address" required><button type="submit">Subscribe</button></form><p class="nl-note" aria-live="polite"></p></div>
+  <div class="wrap footer-bottom">© Cherry Sage. Serving clients worldwide since 1999. · Site by Balay ni Bruno &amp; Co.</div>
+</footer>
+<div class="chat-widget" id="chatWidget" role="button" tabindex="0" aria-label="Chat with Ivy, Cherry's assistant — click to open">
+  <span class="cw-hint" id="cwHint">Click to chat with Ivy</span>
+  <span class="cw-status"><span class="status-dot"></span>Cherry is Online</span>
+  <span class="cw-bubble"><img src="assets/mark-clean.png" alt=""></span>
+</div>
+<script>
+(function(){
+  var SUPABASE_URL='https://ctoeuikxoqlhnebgsygp.supabase.co';
+  var SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0b2V1aWt4b3FsaG5lYmdzeWdwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0ODM4NTMsImV4cCI6MjA5NjA1OTg1M30.Cy0uf8hm-Biea7a1V3bLQBz70f1oyhP83vHDjefTce8';
+
+  var selectedProduct=null, selectedSlotIso=null;
+  var productsBox=document.getElementById('ckProducts');
+  var stepTime=document.getElementById('ckStepTime'), stepInfo=document.getElementById('ckStepInfo');
+  var dateInput=document.getElementById('ckDate'), slotsBox=document.getElementById('ckSlots');
+  var form=document.getElementById('ckForm'), summary=document.getElementById('ckSummary');
+
+  function money(cents){ return '$'+((cents||0)/100).toFixed(2); }
+  function fmtSlot(isoStr){ return new Date(isoStr).toLocaleString('en-US',{timeZone:'America/New_York',weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}); }
+
+  fetch(SUPABASE_URL+'/rest/v1/reading_products?select=id,name,duration_minutes,price_cents,is_first_time_only&requires_scheduling=eq.true&active=eq.true&order=price_cents.asc', {
+    headers:{apikey:SUPABASE_ANON, 'Accept-Profile':'cherry_sage'}
+  }).then(function(r){return r.json();}).then(function(products){
+    if(!products||!products.length){ productsBox.innerHTML='<p style="color:var(--cherry)">No readings available right now, please try again shortly.</p>'; return; }
+    productsBox.innerHTML=products.map(function(p){
+      return '<button type="button" class="ck-product" data-id="'+p.id+'" data-name="'+p.name.replace(/"/g,'&quot;')+'" data-price="'+p.price_cents+'" data-duration="'+p.duration_minutes+'">'+
+        '<span><span class="ck-product-name">'+p.name+'</span><br><span class="ck-product-sub">'+p.duration_minutes+' minutes'+(p.is_first_time_only?' &middot; first-time only':'')+'</span></span>'+
+        '<span class="ck-product-price">'+money(p.price_cents)+'</span></button>';
+    }).join('');
+  }).catch(function(){ productsBox.innerHTML='<p style="color:var(--cherry)">Could not load readings, please refresh the page.</p>'; });
+
+  productsBox.addEventListener('click',function(e){
+    var btn=e.target.closest('.ck-product'); if(!btn) return;
+    productsBox.querySelectorAll('.ck-product').forEach(function(b){b.classList.remove('on');});
+    btn.classList.add('on');
+    selectedProduct={id:btn.getAttribute('data-id'), name:btn.getAttribute('data-name'), priceCents:parseInt(btn.getAttribute('data-price'),10), duration:parseInt(btn.getAttribute('data-duration'),10)};
+    selectedSlotIso=null;
+    stepTime.classList.remove('ck-locked');
+    var today=new Date(); var min=new Date(today.getTime()+24*3600000); var max=new Date(today.getTime()+30*24*3600000);
+    function iso(d){return d.toISOString().slice(0,10);}
+    dateInput.min=iso(min); dateInput.max=iso(max);
+    slotsBox.innerHTML='<p style="color:var(--ink-soft);font-size:.9rem;margin:0">Choose a date to see open times.</p>';
+    updateSummary();
+  });
+
+  dateInput.addEventListener('change',function(){
+    selectedSlotIso=null; updateSummary();
+    if(!dateInput.value||!selectedProduct){ return; }
+    slotsBox.innerHTML='<p style="color:var(--ink-soft);font-size:.9rem;margin:0">Loading open times…</p>';
+    fetch('/.netlify/functions/scheduler-availability?date='+dateInput.value+'&duration='+selectedProduct.duration)
+      .then(function(r){return r.json();})
+      .then(function(d){
+        var slots=d.slots||[];
+        if(!slots.length){ slotsBox.innerHTML='<p style="color:var(--ink-soft);font-size:.9rem;margin:0">'+(d.reason==='day unavailable'?'Cherry is not taking appointments that day.':'No open times that day, try another date.')+'</p>'; return; }
+        slotsBox.innerHTML='<div class="slot-grid">'+slots.map(function(s){ return '<button type="button" class="slot-btn" data-iso="'+s+'">'+fmtSlot(s)+'</button>'; }).join('')+'</div>';
+      }).catch(function(){ slotsBox.innerHTML='<p style="color:var(--cherry);font-size:.9rem;margin:0">Could not load open times, please try again.</p>'; });
+  });
+
+  slotsBox.addEventListener('click',function(e){
+    var btn=e.target.closest('.slot-btn'); if(!btn) return;
+    slotsBox.querySelectorAll('.slot-btn').forEach(function(b){b.classList.remove('on');});
+    btn.classList.add('on');
+    selectedSlotIso=btn.getAttribute('data-iso');
+    stepInfo.classList.remove('ck-locked');
+    updateSummary();
+  });
+
+  function updateSummary(){
+    if(selectedProduct&&selectedSlotIso){
+      summary.hidden=false;
+      document.getElementById('ckSumProduct').textContent=selectedProduct.name;
+      document.getElementById('ckSumTime').textContent=fmtSlot(selectedSlotIso)+' Eastern';
+      document.getElementById('ckSumPrice').textContent=money(selectedProduct.priceCents);
+    } else {
+      summary.hidden=true;
+    }
+  }
+
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    var note=document.getElementById('ckNote'), btn=form.querySelector('button[type=submit]');
+    var email=(form.email.value||'').trim();
+    if(!selectedProduct||!selectedSlotIso){ note.hidden=false; note.textContent='Please choose a reading and a time above first.'; return; }
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ note.hidden=false; note.textContent='Please enter a valid email address.'; return; }
+    if(!form.name.value.trim()){ note.hidden=false; note.textContent='Please enter your name.'; return; }
+    if(form.website.value){ return; }
+    note.hidden=true; btn.disabled=true; btn.textContent='Reserving…';
+    fetch('/.netlify/functions/checkout-start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      name:form.name.value.trim(), email:email, phone:form.phone.value.trim(),
+      slotIso:selectedSlotIso, durationMinutes:selectedProduct.duration, readingProductId:selectedProduct.id
+    })}).then(function(r){return r.json().then(function(d){return {ok:r.ok, data:d};});})
+    .then(function(res){
+      if(!res.ok||!res.data.ok){
+        note.hidden=false; note.textContent=(res.data&&res.data.error==='slot no longer available')?'That time was just taken, please pick another.':'Something went wrong, please try again.';
+        btn.disabled=false; btn.textContent='Reserve This Time';
+        return;
+      }
+      document.querySelectorAll('.ck-step').forEach(function(s){ if(s.id!=='ckStepDone') s.hidden=true; });
+      document.getElementById('ckStepDone').hidden=false;
+      document.getElementById('ckDoneText').textContent=selectedProduct.name+' on '+fmtSlot(selectedSlotIso)+' Eastern, held for the next 10 minutes.';
+      document.getElementById('ckStepDone').scrollIntoView({behavior:'smooth',block:'center'});
+    }).catch(function(){
+      note.hidden=false; note.textContent='Something went wrong, please try again.';
+      btn.disabled=false; btn.textContent='Reserve This Time';
+    });
+  });
+})();
+</script>
+<script src="app.js?v=7"></script>
+<script src="embers.js?v=4"></script>
+<script src="magic.js?v=2"></script>
+<script src="funnel.js?v=8"></script>
+<script src="chat.js?v=7"></script>
+<script src="status.js?v=1"></script>
+</body>
+</html>
