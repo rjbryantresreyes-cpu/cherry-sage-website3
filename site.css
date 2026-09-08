@@ -764,6 +764,16 @@ main section>.wrap,.hero>.wrap,.page-hero>.wrap,.draw-section>.wrap{position:rel
 .img-banner.light{background:#faf6ef}
 .img-banner.top{margin-top:var(--header-h)}
 
+/* ---- Photo hero: heading copy layered directly onto the header photo ---- */
+.photo-hero{position:relative;margin-top:var(--header-h);overflow:hidden}
+.photo-hero img{width:100%;height:auto;display:block}
+.photo-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(74,15,25,.08) 0%,rgba(74,15,25,.55) 62%,rgba(58,12,20,.92) 100%);pointer-events:none}
+.photo-hero-copy{position:absolute;left:0;right:0;bottom:0;padding:0 0 2.6rem;text-align:center;z-index:1}
+.photo-hero-copy .eyebrow{color:var(--gold-bright)}
+.photo-hero-copy h1{color:var(--cream);margin:.2rem 0}
+.photo-hero-copy .lede{color:rgba(255,253,248,.94);max-width:640px;margin:.5rem auto 0}
+@media(max-width:640px){.photo-hero-copy{padding-bottom:1.4rem}.photo-hero-copy h1{font-size:1.7rem}}
+
 /* nl+cloud v31 */
 /* Newsletter signup box — Bev asked for a real designed box, not a plain footer strip
    (2026-09-08). CSS-only redesign so it updates site-wide from this one place. */
