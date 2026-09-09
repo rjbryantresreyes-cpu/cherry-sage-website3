@@ -88,7 +88,7 @@ ${GENERATED_MARKER}
 <meta name="theme-color" content="#6E1A28">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500;1,600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site.css?v=33">
+<link rel="stylesheet" href="site.css?v=44">
 <link rel="icon" href="assets/favicon.ico?v=2" sizes="any">
 <link rel="icon" href="assets/icon-32.png?v=2" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="assets/icon-180.png?v=2">
@@ -98,11 +98,11 @@ ${GENERATED_MARKER}
 <body>
 <header class="site-header">
   <div class="wrap nav-row">
-    <a aria-label='Cherry Sage home' class='brand' href='/'><img src="assets/logo-horizontal.png" alt="Cherry Sage — Psychic, Tarot, Numerology"></a>
+    <a class="brand" href="/" aria-label="Cherry Sage home"><img src="assets/logo-horizontal.png" alt="Cherry Sage — Psychic, Tarot, Numerology"></a>
     <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false">&#9776;</button>
     <nav class="primary-nav" id="primaryNav" aria-label="Primary">
-      <ul><li><a href='/meet'>About</a></li><li><a href='/psychic-reading'>Psychic</a></li><li><a href='/tarot'>Tarot</a></li><li><a href='/numerology'>Numerology</a></li><li><a href='/free-karmic-reading'>Free Numerology</a></li><li><a href='/shop'>Shop</a></li><li class="has-dropdown"><a href='/testimonials'>Testimonials</a><ul class="dropdown"><li><a href="/feedback">Leave Feedback</a></li></ul></li><li><a href='/blog'>Blog</a></li><li><a class='cur' href='/articles'>Guest Articles</a></li><li><a href='/contact'>Contact</a></li><li><a href='/account'>My Account</a></li></ul>
-      <a class='btn btn-primary' href='/shop'>Buy Minutes</a>
+      <ul><li><a href="/meet">Meet Cherry</a></li><li class="has-dropdown"><a href="/psychic-reading">Readings</a><ul class="dropdown"><li><a href="/psychic-reading">Psychic Reading</a></li><li><a href="/tarot">Tarot Card Reading</a></li><li><a href="/book-appointment">Request a Time</a></li></ul></li><li class="has-dropdown"><a href="/numerology">Numerology</a><ul class="dropdown"><li><a href="/free-karmic-reading">Free Numerology Reading</a></li></ul></li><li class="has-dropdown"><a href="/testimonials">Reviews</a><ul class="dropdown"><li><a href="/feedback">Leave Feedback</a></li></ul></li><li class="has-dropdown"><a href="/blog">Blog</a><ul class="dropdown"><li><a href="/articles">Guest Articles</a></li><li><a href="/tarot-pull">Free Tarot Pull</a></li><li><a href="/tarot-spread">Free Tarot Spread</a></li><li><a href="/life-path">Life Path Calculator</a></li><li><a href="/horoscope">Daily Horoscope</a></li></ul></li><li><a href="/contact">Contact</a></li><li class="has-dropdown"><a href="/account" class="nav-utility">My Account</a><ul class="dropdown"><li><a href="https://shop.cherrysage.com/my-account/" target="_blank" rel="noopener">Sign In</a></li><li><a href="https://shop.cherrysage.com/my-account/" target="_blank" rel="noopener">Register</a></li></ul></li></ul>
+      <a class="btn btn-primary" href="/shop">Book a Reading</a>
     </nav>
   </div>
 </header>
@@ -137,7 +137,7 @@ ${GENERATED_MARKER}
 <script src="app.js?v=7"></script>
 <script src="embers.js?v=4"></script>
 <script src="magic.js?v=2"></script>
-<script src="funnel.js?v=6"></script>
+<script src="funnel.js?v=8"></script>
 <script src="chat.js?v=7"></script>
 <script src="status.js?v=1"></script>
 <script src="comments.js?v=1"></script>
