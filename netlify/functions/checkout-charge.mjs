@@ -54,18 +54,15 @@ export default async (req) => {
     return json({ error: "reading product not available" }, 422);
   }
 
-  const { data: customerForPricing } = await supabase
-    .from("customers").select("email, full_name, phone").eq("id", customerId).maybeSingle();
-  if (!customerForPricing) return json({ error: "customer not found" }, 422);
-
   // Derive the real, final price ourselves -- never trust a client-supplied amount or a
-  // client-supplied claim that a coupon is valid.
+  // client-supplied claim that a coupon is valid. price_with_coupon looks the customer up
+  // itself (it's SECURITY DEFINER) rather than us reading `customers` directly here, since
+  // that table has no anon SELECT policy -- reading it with the anon key would silently
+  // return nothing rather than a real error.
   const { data: priced, error: pricedErr } = await supabase.rpc("price_with_coupon", {
     p_reading_product_id: readingProductId,
     p_coupon_code: couponCode,
-    p_email: customerForPricing.email,
-    p_full_name: customerForPricing.full_name,
-    p_phone: customerForPricing.phone,
+    p_customer_id: customerId,
   });
   const priceRow = Array.isArray(priced) ? priced[0] : priced;
   if (pricedErr || !priceRow || priceRow.error) {

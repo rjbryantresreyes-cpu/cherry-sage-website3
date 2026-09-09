@@ -254,8 +254,7 @@
       method:'POST',
       headers:{apikey:SUPABASE_ANON,'Content-Type':'application/json','Content-Profile':'cherry_sage'},
       body:JSON.stringify({
-        p_reading_product_id:selectedProduct.id, p_coupon_code:code,
-        p_email:(form.email.value||'').trim(), p_full_name:(form.name.value||'').trim(), p_phone:(form.phone.value||'').trim()
+        p_reading_product_id:selectedProduct.id, p_coupon_code:code, p_customer_id:currentHold.customerId
       })
     }).then(function(r){return r.json();}).then(function(rows){
       var row=Array.isArray(rows)?rows[0]:rows;
