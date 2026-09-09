@@ -60,6 +60,9 @@ export default async (req) => {
 
     if (details?.customer_email) {
       await sendStatusEmail(details, status, refundResult);
+      if (status === "approved") {
+        await tagLastAppointment(details.customer_email, details.requested_start);
+      }
     }
 
     return json({ ok: true, refund: refundResult });
@@ -129,6 +132,22 @@ async function sendStatusEmail(details, status, refundResult) {
         to: [{ email: details.customer_email }],
         subject, htmlContent: body,
       }),
+    });
+  } catch { /* non-fatal */ }
+}
+
+// Feeds the Thank You automation in Brevo -- it triggers off this date attribute since
+// nothing else pushes appointment data there. Best-effort: a failed tag should never block
+// the approval itself, which is why this has no return value the caller checks.
+async function tagLastAppointment(email, requestedStartIso) {
+  const KEY = process.env.BREVO_KEY;
+  if (!KEY || !email || !requestedStartIso) return;
+  const dateOnly = new Date(requestedStartIso).toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  try {
+    await fetch(`https://api.brevo.com/v3/contacts/${encodeURIComponent(email)}`, {
+      method: "PUT",
+      headers: { "api-key": KEY, "content-type": "application/json", accept: "application/json" },
+      body: JSON.stringify({ attributes: { LAST_APPOINTMENT_AT: dateOnly } }),
     });
   } catch { /* non-fatal */ }
 }
