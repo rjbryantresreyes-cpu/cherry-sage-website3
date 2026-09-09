@@ -2,9 +2,12 @@
 // the slot hold into a real paid order + pending_approval appointment.
 //
 // Security posture, matched to the DB-level fix in confirm_paid_booking:
-// - The amount charged is ALWAYS derived server-side from reading_products, never from
-//   anything the client sends. A compromised/malicious client can misrepresent nothing that
-//   actually costs Cherry money.
+// - The amount charged is ALWAYS derived server-side from reading_products (and, if a coupon
+//   is present, cherry_sage.price_with_coupon), never from anything the client sends. A
+//   compromised/malicious client can misrepresent nothing that actually costs Cherry money.
+// - A coupon's one-time-use-per-customer check (matching on email, phone, OR name -- so
+//   switching your email doesn't get you a second first-timer discount) is re-run again inside
+//   confirm_paid_booking right before the order is written, not trusted from this earlier call.
 // - confirm_paid_booking is only ever called AFTER Clover itself confirms status:"succeeded"
 //   and paid:true on a real charge response -- the DB function no longer trusts a caller's
 //   claimed payment id, but this is the actual point where the real verification happens.
@@ -37,11 +40,11 @@ export default async (req) => {
   const customerId = String(d.customerId || "");
   const readingProductId = String(d.readingProductId || "");
   const cardToken = String(d.cardToken || "");
+  const couponCode = d.couponCode ? String(d.couponCode).trim() : null;
 
   if (!holdId || !customerId || !readingProductId) return json({ error: "missing booking details" }, 422);
   if (!cardToken.startsWith("clv_")) return json({ error: "invalid card token" }, 422);
 
-  // Derive the real price ourselves -- never trust a client-supplied amount.
   const { data: product, error: productErr } = await supabase
     .from("reading_products")
     .select("id, name, price_cents, active, requires_scheduling")
@@ -50,6 +53,25 @@ export default async (req) => {
   if (productErr || !product || !product.active || !product.requires_scheduling) {
     return json({ error: "reading product not available" }, 422);
   }
+
+  const { data: customerForPricing } = await supabase
+    .from("customers").select("email, full_name, phone").eq("id", customerId).maybeSingle();
+  if (!customerForPricing) return json({ error: "customer not found" }, 422);
+
+  // Derive the real, final price ourselves -- never trust a client-supplied amount or a
+  // client-supplied claim that a coupon is valid.
+  const { data: priced, error: pricedErr } = await supabase.rpc("price_with_coupon", {
+    p_reading_product_id: readingProductId,
+    p_coupon_code: couponCode,
+    p_email: customerForPricing.email,
+    p_full_name: customerForPricing.full_name,
+    p_phone: customerForPricing.phone,
+  });
+  const priceRow = Array.isArray(priced) ? priced[0] : priced;
+  if (pricedErr || !priceRow || priceRow.error) {
+    return json({ error: priceRow?.error || "could not price this reading" }, 422);
+  }
+  const finalPriceCents = priceRow.final_price_cents;
 
   // Confirm the hold is still ours and hasn't expired before we ever touch a real card.
   const { data: hold } = await supabase
@@ -64,8 +86,14 @@ export default async (req) => {
     return json({ error: "reading product does not match the held slot" }, 422);
   }
 
-  // Submit the real charge to Clover.
+  // A coupon can bring this to $0. Clover, like most processors, doesn't do real $0.00
+  // charges (Bev's own WooCommerce terminal has the same quirk) -- skip the charge entirely
+  // rather than send an amount that isn't a real transaction.
   let charge, cloverRes, raw;
+  if (finalPriceCents === 0) {
+    charge = { status: "succeeded", paid: true, id: `free-${holdId}` };
+  } else {
+  // Submit the real charge to Clover.
   try {
     cloverRes = await fetch(`${CLOVER_API_BASE}/v1/charges`, {
       method: "POST",
@@ -75,7 +103,7 @@ export default async (req) => {
         "Accept": "application/json",
       },
       body: JSON.stringify({
-        amount: product.price_cents,
+        amount: finalPriceCents,
         currency: "usd",
         source: cardToken,
         ecomind: "ecom",
@@ -94,14 +122,17 @@ export default async (req) => {
   if (charge.status !== "succeeded" || charge.paid !== true) {
     return json({ error: "Payment did not complete. Please try again." }, 402);
   }
+  } // end finalPriceCents === 0 ? / else
 
-  // Only now, with a real confirmed charge, convert the hold into a real booking.
+  // Only now, with a real confirmed charge (or a confirmed $0 coupon redemption), convert the
+  // hold into a real booking.
   const { data: orderId, error: confirmErr } = await supabase.rpc("confirm_paid_booking", {
     p_server_key: SERVER_KEY,
     p_hold_id: holdId,
     p_customer_id: customerId,
     p_reading_product_id: readingProductId,
     p_clover_payment_id: charge.id,
+    p_coupon_code: couponCode,
   });
   if (confirmErr || !orderId) {
     // The card WAS charged successfully but we couldn't record the booking -- this needs a
@@ -131,15 +162,16 @@ export default async (req) => {
     timeZone: "America/New_York", weekday: "long", month: "long", day: "numeric", hour: "numeric", minute: "2-digit",
   }) + " Eastern";
   const money = (c) => "$" + (c / 100).toFixed(2);
+  const couponLine = couponCode ? `<br>Coupon used: ${esc(couponCode.toUpperCase())}` : "";
   await notify(process.env.NOTIFY_EMAIL, `New paid booking — ${product.name}`,
     `<p><strong>${esc(customer?.full_name || "A customer")}</strong> just booked and paid for a reading.</p>` +
-    `<p>Reading: ${esc(product.name)}<br>When: ${esc(when)}<br>Amount: ${money(product.price_cents)}<br>Email: ${esc(customer?.email || "")}</p>` +
+    `<p>Reading: ${esc(product.name)}<br>When: ${esc(when)}<br>Amount: ${money(finalPriceCents)}${couponLine}<br>Email: ${esc(customer?.email || "")}</p>` +
     `<p style="color:#888;font-size:12px">Approve, decline, or offer an alternate time at /appointments-dashboard.html</p>`,
     customer?.email ? { email: customer.email } : undefined);
   if (customer?.email) {
     await notify(customer.email, "Your reading with Cherry Sage — payment received",
       `<p>Thank you, ${esc(customer.full_name || "")}. Your payment for <strong>${esc(product.name)}</strong> on ${esc(when)} went through.</p>` +
-      `<p>Amount charged: ${money(product.price_cents)}</p>` +
+      `<p>Amount charged: ${money(finalPriceCents)}</p>` +
       `<p>Cherry will review and confirm your appointment shortly. You'll hear from her directly once it's confirmed.</p>`);
   }
 
@@ -147,7 +179,7 @@ export default async (req) => {
     ok: true,
     orderId,
     chargeId: charge.id,
-    product: { name: product.name, priceCents: product.price_cents },
+    product: { name: product.name, priceCents: finalPriceCents },
     requestedStart: hold.requested_start,
   });
 };

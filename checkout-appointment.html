@@ -87,6 +87,11 @@
   <div class="ck-step ck-locked" id="ckStepPay">
     <h2><span class="ck-step-num">4</span>Payment</h2>
     <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 1rem" id="ckHoldNote"></p>
+    <div style="display:flex;gap:.6rem;max-width:420px;margin-bottom:1rem;align-items:flex-end">
+      <div style="flex:1"><label style="display:block;font-size:.8rem;color:var(--ink-soft);margin-bottom:.3rem">Coupon code (optional)</label><input type="text" id="ckCoupon" style="width:100%;padding:.7rem .9rem;border:1px solid var(--line-strong);border-radius:10px;font-family:var(--font-body);text-transform:uppercase" placeholder="e.g. TEST100"></div>
+      <button class="btn btn-ghost" id="ckApplyCoupon" type="button" style="white-space:nowrap">Apply</button>
+    </div>
+    <p id="ckCouponNote" class="ck-note" hidden style="margin:0 0 1rem"></p>
     <div style="display:grid;gap:.7rem;max-width:420px">
       <div><label style="display:block;font-size:.8rem;color:var(--ink-soft);margin-bottom:.3rem">Card number</label><div id="ckCardNumber" class="ck-field" style="min-height:44px"></div></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
@@ -221,10 +226,11 @@
         return;
       }
       currentHold={holdId:res.data.holdId, customerId:res.data.customerId, expiresInSeconds:res.data.expiresInSeconds};
+      currentPriceCents=selectedProduct.priceCents; appliedCoupon=null;
       stepInfo.hidden=true;
       var payStep=document.getElementById('ckStepPay');
       payStep.classList.remove('ck-locked'); payStep.hidden=false;
-      document.getElementById('ckHoldNote').textContent='Your time is held for the next 10 minutes while you pay. '+selectedProduct.name+', '+money(selectedProduct.priceCents)+'.';
+      document.getElementById('ckHoldNote').textContent='Your time is held for the next 10 minutes while you pay. '+selectedProduct.name+', '+money(currentPriceCents)+'.';
       initCloverFields();
       payStep.scrollIntoView({behavior:'smooth',block:'center'});
     }).catch(function(){
@@ -237,6 +243,34 @@
   var CLOVER_PUBLIC_TOKEN='9cfc3848689bc857cafbfaa1f97b69a4';
   var CLOVER_MERCHANT_ID='266062678880';
   var currentHold=null, cloverInstance=null, cloverCardNumber=null, cloverFieldsReady=false;
+  var appliedCoupon=null, currentPriceCents=null;
+
+  document.getElementById('ckApplyCoupon').addEventListener('click',function(){
+    var code=(document.getElementById('ckCoupon').value||'').trim();
+    var couponNote=document.getElementById('ckCouponNote');
+    if(!code){ couponNote.hidden=false; couponNote.textContent='Enter a code first.'; return; }
+    couponNote.hidden=false; couponNote.textContent='Checking…';
+    fetch(SUPABASE_URL+'/rest/v1/rpc/price_with_coupon',{
+      method:'POST',
+      headers:{apikey:SUPABASE_ANON,'Content-Type':'application/json','Content-Profile':'cherry_sage'},
+      body:JSON.stringify({
+        p_reading_product_id:selectedProduct.id, p_coupon_code:code,
+        p_email:(form.email.value||'').trim(), p_full_name:(form.name.value||'').trim(), p_phone:(form.phone.value||'').trim()
+      })
+    }).then(function(r){return r.json();}).then(function(rows){
+      var row=Array.isArray(rows)?rows[0]:rows;
+      if(!row||row.error){
+        couponNote.textContent=(row&&row.error)||'That code is not valid.';
+        appliedCoupon=null; currentPriceCents=selectedProduct.priceCents;
+      }else{
+        appliedCoupon=code; currentPriceCents=row.final_price_cents;
+        couponNote.textContent='Coupon applied — new total '+money(currentPriceCents)+'.';
+      }
+      document.getElementById('ckHoldNote').textContent='Your time is held for the next 10 minutes while you pay. '+selectedProduct.name+', '+money(currentPriceCents)+'.';
+    }).catch(function(){
+      couponNote.textContent='Could not check that code, please try again.';
+    });
+  });
 
   function initCloverFields(){
     if(cloverFieldsReady) return;
@@ -266,7 +300,7 @@
         return;
       }
       return fetch('/.netlify/functions/checkout-charge',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-        holdId:currentHold.holdId, customerId:currentHold.customerId, readingProductId:selectedProduct.id, cardToken:result.token
+        holdId:currentHold.holdId, customerId:currentHold.customerId, readingProductId:selectedProduct.id, cardToken:result.token, couponCode:appliedCoupon
       })}).then(function(r){return r.json().then(function(d){return {ok:r.ok, data:d};});})
       .then(function(res){
         if(!res.ok||!res.data.ok){
