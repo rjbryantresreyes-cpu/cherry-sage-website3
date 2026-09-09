@@ -15,8 +15,14 @@
 // attribute-order variants across pages, harmless cosmetically), so a raw-string diff
 // would false-positive constantly and train everyone to ignore this check.
 //
-// Runs first in `npm run build`, before either generator, so a real drift blocks the
-// whole deploy rather than shipping a newly-published page with stale chrome.
+// Runs first in `npm run build`, before either generator. Only BLOCKS the deploy (exit 1)
+// when there's actually a new page/article queued to publish -- that's the one case where
+// drift would really ship stale chrome. If nothing is queued, a drift finding still can't
+// hurt anyone (build-pages.js/build-articles.js just no-op), so it WARNS instead of
+// failing -- this script must never be able to block an unrelated site deploy (a real bug
+// fix, a content edit) just because the builder scripts happen to be behind. Found this the
+// hard way: the first version blocked on every deploy, which would have stopped a real,
+// unrelated app.js bug fix from a concurrent session from shipping at all.
 import { readFileSync, readdirSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
@@ -147,11 +153,26 @@ for (const file of BUILDER_SCRIPTS) {
 
 for (const w of warnings) console.warn(`[check-drift] WARNING: ${w}`);
 
-if (failed.length) {
-  console.error("\n[check-drift] BUILD BLOCKED — the self-service builder scripts are out of sync with the live site:\n");
-  for (const msg of failed) console.error("  - " + msg);
-  console.error("\nFix scripts/build-pages.js and/or scripts/build-articles.js to match a real live page, verify with a real test build, then re-run.\n");
-  process.exit(1);
+// Only a page/article actually queued to publish can turn drift into real harm (a live
+// page shipping stale chrome) -- an idle pipeline can't hurt anyone no matter how stale
+// its template is, so only THAT case is allowed to fail the build.
+function hasQueuedContent(dir) {
+  try {
+    return readdirSync(join(ROOT, dir)).some((f) => f.endsWith(".md"));
+  } catch {
+    return false;
+  }
 }
+const queued = hasQueuedContent("content/pages") || hasQueuedContent("content/articles");
 
-console.log("[check-drift] OK — builder scripts match the live site's shared chrome, article CTA, and asset versions.");
+if (failed.length) {
+  const heading = queued
+    ? "[check-drift] BUILD BLOCKED — the self-service builder scripts are out of sync with the live site, and something is queued to publish:"
+    : "[check-drift] DRIFT DETECTED (not blocking — nothing is currently queued to publish, so nothing will actually ship stale):";
+  console.error(`\n${heading}\n`);
+  for (const msg of failed) console.error("  - " + msg);
+  console.error("\nFix scripts/build-pages.js and/or scripts/build-articles.js to match a real live page, verify with a real test build, then commit.\n");
+  if (queued) process.exit(1);
+} else {
+  console.log("[check-drift] OK — builder scripts match the live site's shared chrome, article CTA, and asset versions.");
+}
