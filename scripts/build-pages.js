@@ -16,8 +16,6 @@ const { load: loadYaml } = yaml;
 // on the live site as real, executing markup. Strip it down to a safe prose subset instead.
 const BLOCK_TAGS = ["p", "br", "strong", "em", "b", "i", "a", "ul", "ol", "li", "blockquote", "h2", "h3", "h4", "code", "pre", "img"];
 const BLOCK_ATTRS = { a: ["href", "title", "target", "rel"], img: ["src", "alt", "title"] };
-const INLINE_TAGS = ["strong", "em", "b", "i", "a", "code"];
-const INLINE_ATTRS = { a: ["href", "title"] };
 const SAFE_SCHEMES = ["http", "https", "mailto"];
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -39,12 +37,6 @@ function parseFrontMatter(raw) {
   return { data: loadYaml(m[1]) || {}, body: m[2] };
 }
 
-function mdInline(s) {
-  // Renders short markdown (bold/italic/links) without wrapping it in a <p>, for headings/labels.
-  const raw = marked.parseInline(String(s || "").trim());
-  return sanitizeHtml(raw, { allowedTags: INLINE_TAGS, allowedAttributes: INLINE_ATTRS, allowedSchemes: SAFE_SCHEMES });
-}
-
 function mdBlock(s) {
   // Renders a full markdown body (paragraphs, links, basic formatting) for a Text block.
   const raw = marked.parse(String(s || "").trim());
@@ -55,16 +47,17 @@ function renderBlock(block, i) {
   switch (block.type) {
     case "text": {
       const heading = block.heading
-        ? `<div class="section-head reveal"><h2>${mdInline(block.heading)}</h2></div>`
+        ? `<div class="section-head reveal"><h2>${esc(block.heading)}</h2></div>`
         : "";
       return `<section class="section"><div class="wrap">${heading}<div class="blk-prose reveal">${mdBlock(block.body)}</div></div></section>`;
     }
     case "image_text": {
       const side = block.image_position === "right" ? " right" : "";
-      const heading = block.heading ? `<h2>${mdInline(block.heading)}</h2>` : "";
+      const heading = block.heading ? `<h2>${esc(block.heading)}</h2>` : "";
+      const body = esc(block.body).replace(/\n/g, "<br>");
       return `<section class="section"><div class="wrap"><div class="blk-imgtext${side} reveal">
         <div><img src="${esc(block.image)}" alt="${esc(block.heading || "")}"></div>
-        <div>${heading}<p>${mdInline(block.body)}</p></div>
+        <div>${heading}<p>${body}</p></div>
       </div></div></section>`;
     }
     case "quote": {
@@ -88,7 +81,7 @@ function renderBlock(block, i) {
       return `<section class="section"><div class="wrap"><div class="section-head reveal"><h2>${esc(block.heading || "Frequently Asked Questions")}</h2></div><div class="reveal">${items}</div></div></section>`;
     }
     case "gallery": {
-      const heading = block.heading ? `<div class="section-head reveal"><h2>${mdInline(block.heading)}</h2></div>` : "";
+      const heading = block.heading ? `<div class="section-head reveal"><h2>${esc(block.heading)}</h2></div>` : "";
       const figs = (block.images || [])
         .map((im) => `<figure><img src="${esc(im.image)}" alt="${esc(im.caption || "")}" loading="lazy">${im.caption ? `<figcaption>${esc(im.caption)}</figcaption>` : ""}</figure>`)
         .join("");
