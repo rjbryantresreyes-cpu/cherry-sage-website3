@@ -71,14 +71,15 @@ export default async (req) => {
   const finalPriceCents = priceRow.final_price_cents;
 
   // Confirm the hold is still ours and hasn't expired before we ever touch a real card.
-  const { data: hold } = await supabase
-    .from("slot_holds")
-    .select("id, expires_at, requested_start, duration_minutes")
-    .eq("id", holdId)
-    .maybeSingle();
-  if (!hold || new Date(hold.expires_at).getTime() <= Date.now()) {
+  // slot_holds has RLS with zero policies (nobody should be able to read every hold in the
+  // table via the anon key) -- check_hold_valid is the narrow, SECURITY DEFINER way to ask
+  // "is just this one hold still good" without opening the table itself up.
+  const { data: holdCheck } = await supabase.rpc("check_hold_valid", { p_hold_id: holdId });
+  const holdRow = Array.isArray(holdCheck) ? holdCheck[0] : holdCheck;
+  if (!holdRow || !holdRow.is_valid) {
     return json({ error: "Your held time has expired, please choose a time again." }, 409);
   }
+  const hold = { requested_start: holdRow.requested_start, duration_minutes: holdRow.duration_minutes };
   if (hold.duration_minutes !== product.duration_minutes) {
     return json({ error: "reading product does not match the held slot" }, 422);
   }
