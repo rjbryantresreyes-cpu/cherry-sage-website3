@@ -145,6 +145,12 @@
       }
       if(HEAVY.test(question)){ gentle(); return; }
 
+      // Dismiss the keyboard right away, on our terms. Otherwise its close animation and our
+      // own scroll-into-view below can fire at nearly the same moment and fight each other,
+      // which on some phones shows up as the page suddenly jumping and the reveal landing
+      // off-screen, looking like nothing happened.
+      if(q) q.blur();
+
       var chosen=e.currentTarget;
       [].slice.call(spread.querySelectorAll('.t-card-back')).forEach(function(b){ if(b!==chosen) b.classList.add('dim'); b.disabled=true; });
       chosen.classList.add('chosen');
@@ -166,8 +172,8 @@
         if(window.CSFunnel&&window.CSFunnel.wireOptin) window.CSFunnel.wireOptin(result);
         var again=scope.querySelector('#tAgain');
         if(again) again.onclick=function(){ if(q)q.value=''; buildDeck(); };
-        result.scrollIntoView({behavior:'smooth',block:'center'});
-      },520);
+        result.scrollIntoView({behavior:'auto',block:'start'});
+      },650);
     }
 
     function gentle(){

@@ -44,6 +44,9 @@
     var question=(q.value||'').trim();
     if(!question){ note("Take a breath and ask the cards a question first."); return; }
     if(HEAVY.test(question)){ gentle(); return; }
+    // Dismiss the keyboard on our terms before we scroll -- its close animation racing our
+    // own scrollIntoView is a known way for the page to jump unexpectedly on some phones.
+    q.blur();
     var idx=[]; while(idx.length<3){ var r=Math.floor(Math.random()*DECK.length); if(idx.indexOf(r)<0) idx.push(r); }
     picks=idx.map(function(i){return DECK[i];}); revealed=0;
     s1.hidden=true; s2.hidden=false; result.hidden=true;
@@ -56,7 +59,7 @@
       c.addEventListener('click',function(){ flip(c,i); });
       col.appendChild(c); spread.appendChild(col);
     });
-    s2.scrollIntoView({behavior:'smooth',block:'center'});
+    setTimeout(function(){ s2.scrollIntoView({behavior:'auto',block:'start'}); },150);
   });
 
   function flip(btn,i){
@@ -84,7 +87,7 @@
     '</div>';
     if(window.CSFunnel&&window.CSFunnel.wireOptin) window.CSFunnel.wireOptin(result);
     document.getElementById('sAgain').onclick=reset;
-    result.scrollIntoView({behavior:'smooth',block:'center'});
+    result.scrollIntoView({behavior:'auto',block:'start'});
   }
 
   function note(t){ var n=document.getElementById('sQNote');
