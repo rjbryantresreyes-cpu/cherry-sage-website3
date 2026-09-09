@@ -673,6 +673,11 @@ main section>.wrap,.hero>.wrap,.page-hero>.wrap,.draw-section>.wrap{position:rel
    endless loop along a shallow arc, positioned every frame by pull.js via inline transform —
    no CSS transition here, it would fight the per-frame updates and lag behind them. */
 /* Bev's call (2026-09-08): click the actual card to pick it; the button just shuffles. */
+/* Bev's call (2026-09-10): the question box + card deck should read as one contained
+   feature, not loose sections floating on the page. */
+.t-feature{max-width:640px;margin:0 auto;background:var(--cream);border:1px solid var(--line);
+  border-radius:var(--r-lg);padding:2rem 1.8rem;box-shadow:var(--shadow-sm)}
+@media(max-width:560px){.t-feature{padding:1.6rem 1.1rem}}
 .t-spread-scroll{overflow:hidden;padding:12px 0 28px}
 .t-spread{position:relative;height:200px;margin:0 auto;width:100%;max-width:520px}
 .t-card-back{position:absolute;top:30px;left:50%;margin-left:-39px;width:78px;height:128px;border-radius:11px;cursor:pointer;
