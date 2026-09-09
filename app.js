@@ -2,19 +2,41 @@
 (function(){
   // scroll reveal — anything already on screen at load (hero included) shows immediately,
   // never waits on the observer. Below-the-fold content still fades in on scroll.
+  //
+  // This also has to catch elements that don't exist yet at page load. Several features
+  // (tarot pull/spread results, life-path, horoscope, any Pages-builder block) insert a fresh
+  // .reveal element long after load, on click, sometimes many seconds later. The original code
+  // only ever scanned .reveal once at load plus a single 1200ms safety-net pass, so anything
+  // created after that point got the CSS default opacity:0 and NOTHING ever added .in to it --
+  // permanently invisible on a real browser, not just slow. A MutationObserver below catches
+  // every .reveal added at any time, however it's added, and runs it through the exact same
+  // logic, so this can't silently regress again.
   var io = new IntersectionObserver(function(entries){
     entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
   }, {threshold:0.12, rootMargin:'0px 0px -8% 0px'});
-  document.querySelectorAll('.reveal').forEach(function(el,i){
-    el.style.transitionDelay=(i%3*0.08)+'s';
+
+  function revealOne(el,i){
+    el.style.transitionDelay=((i||0)%3*0.08)+'s';
     var r=el.getBoundingClientRect();
     if(r.top < window.innerHeight && r.bottom > 0){ el.classList.add('in'); }
     else { io.observe(el); }
+    // per-element safety net -- never let anything stay invisible for more than a moment,
+    // however/whenever it was added, on any device/browser.
+    setTimeout(function(){ el.classList.add('in'); }, 1200);
+  }
+
+  document.querySelectorAll('.reveal').forEach(revealOne);
+
+  var mo = new MutationObserver(function(mutations){
+    mutations.forEach(function(m){
+      m.addedNodes.forEach(function(node){
+        if(node.nodeType !== 1) return;
+        if(node.classList && node.classList.contains('reveal') && !node.classList.contains('in')){ revealOne(node); }
+        if(node.querySelectorAll){ node.querySelectorAll('.reveal:not(.in)').forEach(revealOne); }
+      });
+    });
   });
-  // safety net: never let anything stay invisible for more than a moment, on any device/browser
-  setTimeout(function(){
-    document.querySelectorAll('.reveal:not(.in)').forEach(function(el){ el.classList.add('in'); });
-  }, 1200);
+  mo.observe(document.body, {childList:true, subtree:true});
 
   // mobile nav
   var t=document.getElementById('navToggle'), n=document.getElementById('primaryNav');
