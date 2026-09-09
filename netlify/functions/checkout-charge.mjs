@@ -47,7 +47,7 @@ export default async (req) => {
 
   const { data: product, error: productErr } = await supabase
     .from("reading_products")
-    .select("id, name, price_cents, active, requires_scheduling")
+    .select("id, name, price_cents, active, requires_scheduling, duration_minutes")
     .eq("id", readingProductId)
     .maybeSingle();
   if (productErr || !product || !product.active || !product.requires_scheduling) {
