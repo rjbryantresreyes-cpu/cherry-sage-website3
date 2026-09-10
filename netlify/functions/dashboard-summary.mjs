@@ -56,14 +56,26 @@ export default async (req) => {
       }
     } catch { /* non-fatal */ }
     try {
+      // The bulk /contacts/lists endpoint reports 0 subscribers for every list -- a known Brevo
+      // quirk, already documented on BBC's own /os/crm.html. The per-list endpoint is accurate,
+      // so fetch each list individually rather than trust the bulk listing's counts.
       const listsRes = await fetch("https://api.brevo.com/v3/contacts/lists?limit=50&sort=desc", {
         headers: { "api-key": BREVO_KEY, accept: "application/json" },
       });
       if (listsRes.ok) {
         const lData = await listsRes.json();
-        brevo.lists = (lData.lists || []).map((l) => ({
-          id: l.id, name: l.name, totalSubscribers: l.totalSubscribers ?? l.uniqueSubscribers ?? null,
+        const ids = (lData.lists || []).map((l) => l.id);
+        const details = await Promise.all(ids.map(async (id) => {
+          try {
+            const r = await fetch(`https://api.brevo.com/v3/contacts/lists/${id}`, {
+              headers: { "api-key": BREVO_KEY, accept: "application/json" },
+            });
+            if (!r.ok) return null;
+            const d = await r.json();
+            return { id: d.id, name: d.name, totalSubscribers: d.totalSubscribers ?? d.uniqueSubscribers ?? null };
+          } catch { return null; }
         }));
+        brevo.lists = details.filter(Boolean);
       }
     } catch { /* non-fatal */ }
     try {
