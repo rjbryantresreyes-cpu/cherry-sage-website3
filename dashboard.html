@@ -10,6 +10,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500;1,600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="site.css?v=45">
 <link rel="icon" href="assets/favicon.ico?v=2" sizes="any">
+<link rel="manifest" href="/dashboard-manifest.json">
+<link rel="apple-touch-icon" href="/assets/icon-180.png">
+<meta name="theme-color" content="#6E1A28">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CS Dashboard">
 <style>
   .dash-wrap{max-width:1100px;margin:0 auto;padding:2.4rem 1.4rem 5rem}
   .dash-gate{max-width:420px;margin:5rem auto;text-align:center;padding:2.4rem;background:var(--cream);border:1px solid var(--line);border-radius:var(--r-lg);box-shadow:var(--shadow-sm)}
@@ -245,6 +252,10 @@
     var q=this.value.toLowerCase();
     renderSitemap(sitemapPages.filter(function(p){ return p.loc.toLowerCase().indexOf(q)>-1; }));
   });
+
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('/dashboard-sw.js', { scope: '/dashboard.html' }).catch(function(){});
+  }
 
   tryEnterApp();
 })();

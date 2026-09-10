@@ -1,0 +1,17 @@
+{
+  "name": "Cherry Sage Dashboard",
+  "short_name": "CS Dashboard",
+  "description": "Bookings, revenue, and email stats for Cherry Sage.",
+  "start_url": "/dashboard.html",
+  "scope": "/dashboard.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FFFDF8",
+  "theme_color": "#6E1A28",
+  "icons": [
+    { "src": "/assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
