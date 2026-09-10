@@ -39,11 +39,19 @@ export default async (req) => {
   let brevo = "skipped";
   const KEY = process.env.BREVO_KEY;
   const LIST = process.env.BREVO_LIST_ID;
+  // SOURCE is a single mutable attribute -- a contact's later activity (checkout, contact form)
+  // overwrites it, so it can't reliably identify "who opted into weekly tips" over time. List
+  // membership is additive and stable, so weekly-tips opt-ins ALSO join a dedicated list (14,
+  // "Weekly Tips Subscribers") regardless of whatever they do afterward.
+  const WEEKLY_TIPS_SOURCES = ["weekly-tips-hero", "weekly-tips-draw", "popup-shuffle", "chat-weekly"];
+  const WEEKLY_TIPS_LIST_ID = 14;
   if (KEY) {
     try {
+      const listIds = LIST ? [Number(LIST)] : [];
+      if (WEEKLY_TIPS_SOURCES.includes(source)) listIds.push(WEEKLY_TIPS_LIST_ID);
       const body = { email, updateEnabled: true,
         attributes: { SOURCE: source, ...(name ? { FIRSTNAME: name } : {}), ...(message ? { MESSAGE: message } : {}) },
-        ...(LIST ? { listIds: [Number(LIST)] } : {}) };
+        ...(listIds.length ? { listIds } : {}) };
       const r = await fetch("https://api.brevo.com/v3/contacts", {
         method: "POST",
         headers: { "api-key": KEY, "content-type": "application/json", accept: "application/json" },
