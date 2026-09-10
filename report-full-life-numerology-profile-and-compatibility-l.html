@@ -62,18 +62,24 @@
   </div>
 </div></section>
 <script>
-(function(){var f=document.getElementById('reportForm');if(!f)return;var t0=Date.now();
+(function(){var f=document.getElementById('reportForm');if(!f)return;
   f.addEventListener('submit',function(e){e.preventDefault();
     var note=document.getElementById('rfNote'),btn=f.querySelector('button');
     var email=(f.email.value||'').trim();
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){note.hidden=false;note.textContent='Please enter a valid email.';return;}
     if(!(f.fullname.value||'').trim()||!f.dob.value){note.hidden=false;note.textContent='Please add your full birth name and date of birth.';return;}
-    if(!(f.fullname2.value||'').trim()||!f.dob2.value){note.hidden=false;note.textContent='Please add the second person\'s full birth name and date of birth.';return;}
-    btn.disabled=true;btn.textContent='Saving...';
-    fetch('/.netlify/functions/lead',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({email:email,name:f.fullname.value.trim(),message:'Report: FULL-LIFE NUMEROLOGY PROFILE and COMPATIBILITY LOVE PROFILE | Person 1: '+f.fullname.value.trim()+' (DOB '+f.dob.value+')'+' | Person 2: '+f.fullname2.value.trim()+' (DOB '+f.dob2.value+')',source:'report:FULL-LIFE NUMEROLOGY PROFILE and COMPATIBILITY LOVE PROFILE',website:f.website.value,t:t0})})
-    .then(function(r){return r.ok;}).catch(function(){return false;})
-    .then(function(){ f.innerHTML='<p style="margin:0 0 1rem;color:var(--oxblood);font-weight:600">Thank you. Cherry has your details for your FULL-LIFE NUMEROLOGY PROFILE and COMPATIBILITY LOVE PROFILE. The last step is payment, and she will begin your report.</p><a class="btn btn-gold" href="https://shop.cherrysage.com/product/full-life-numerology-profile-compatibility-love-profile/" target="_blank" rel="noopener">Continue to secure payment</a>'; });
+    if(!(f.fullname2.value||'').trim()||!f.dob2.value){note.hidden=false;note.textContent='Please add the second person\'s full name and date of birth.';return;}
+    if(f.website.value){ return; }
+    note.hidden=true; btn.disabled=true;btn.textContent='Saving...';
+    var details={fullname:f.fullname.value.trim(), dob:f.dob.value, fullname2:(f.fullname2.value||'').trim(), dob2:f.dob2.value||''};
+    fetch('/.netlify/functions/purchase-start',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({name:f.fullname.value.trim(),email:email,readingProductId:'679c979b-42b1-4cb0-a5fa-debe411f6638'})})
+    .then(function(r){return r.json().then(function(d){return {ok:r.ok,data:d};});})
+    .then(function(res){
+      if(!res.ok||!res.data.ok){ note.hidden=false; note.textContent='Something went wrong, please try again.'; btn.disabled=false; btn.textContent='Save my details \u0026 continue to payment'; return; }
+      try{ sessionStorage.setItem('cs_report_details', JSON.stringify(details)); }catch(e){}
+      location.href='/report-payment.html?customer='+encodeURIComponent(res.data.customerId)+'&product=679c979b-42b1-4cb0-a5fa-debe411f6638';
+    }).catch(function(){ note.hidden=false; note.textContent='Something went wrong, please try again.'; btn.disabled=false; btn.textContent='Save my details \u0026 continue to payment'; });
   });})();
 </script><section class="section section-dark cta" id="book"><div class="wrap reveal"><h2>Ready for clarity?</h2><p>Your first step is a quiet one. Book your reading and let the answers you're seeking find their way to you.</p><a class="btn btn-gold" href="/shop">Book a Reading</a></div></section>
 </main>

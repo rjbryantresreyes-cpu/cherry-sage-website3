@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Complete Your Payment — Cherry Sage</title>
+<meta name="description" content="Complete payment for your numerology report from Cherry Sage.">
+<meta name="robots" content="noindex,follow">
+<meta name="theme-color" content="#6E1A28">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500;1,600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site.css?v=45">
+<link rel="icon" href="assets/favicon.ico?v=2" sizes="any">
+<link rel="icon" href="assets/icon-32.png?v=2" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="assets/icon-180.png?v=2">
+<style>
+.ck-wrap{max-width:520px;margin:0 auto}
+.ck-field{padding:.8rem 1rem;border:1px solid var(--line-strong);border-radius:12px;font-family:var(--font-body);width:100%}
+.ck-note{font-size:.85rem;color:var(--cherry);margin-top:.6rem}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap nav-row">
+    <a aria-label='Cherry Sage home' class='brand' href='/'><img src="assets/logo-horizontal.png" alt="Cherry Sage — Psychic, Tarot, Numerology"></a>
+    <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false">&#9776;</button>
+    <nav class="primary-nav" id="primaryNav" aria-label="Primary">
+      <ul><li><a href="/meet">Meet Cherry</a></li><li class="has-dropdown"><a href="/psychic-reading">Readings</a><ul class="dropdown"><li><a href="/psychic-reading">Psychic Reading</a></li><li><a href="/tarot">Tarot Card Reading</a></li><li><a href="/book-appointment">Request a Time</a></li></ul></li><li class="has-dropdown"><a href="/numerology">Numerology</a><ul class="dropdown"><li><a href="/free-karmic-reading">Free Numerology Reading</a></li></ul></li><li class="has-dropdown"><a href="/testimonials">Reviews</a><ul class="dropdown"><li><a href="/feedback">Leave Feedback</a></li></ul></li><li class="has-dropdown"><a href="/blog">Blog</a><ul class="dropdown"><li><a href="/articles">Guest Articles</a></li></ul></li><li class="has-dropdown"><a href="/tarot-pull">Free Tools</a><ul class="dropdown"><li><a href="/tarot-pull">Free Tarot Pull</a></li><li><a href="/tarot-spread">Free Tarot Spread</a></li><li><a href="/life-path">Life Path Calculator</a></li><li><a href="/horoscope">Daily Horoscope</a></li></ul></li><li><a href="/shop">Shop</a></li><li><a href="/contact">Contact</a></li><li class="has-dropdown"><a href="/account" class="nav-utility">My Account</a><ul class="dropdown"><li><a href="https://shop.cherrysage.com/my-account/" target="_blank" rel="noopener">Sign In</a></li><li><a href="https://shop.cherrysage.com/my-account/" target="_blank" rel="noopener">Register</a></li></ul></li></ul>
+      <a class='btn btn-primary' href='/shop'>Book a Reading</a>
+    </nav>
+  </div>
+</header>
+<main>
+<section class="page-hero banner"><div class="ph-glow" aria-hidden="true"></div><div class="ph-stars" aria-hidden="true"></div><div class="wrap reveal"><p class="eyebrow">Last step</p><h1>Complete Your Payment</h1><p class="lede" id="rpSummaryLede">Loading your order…</p></div></section>
+<section class="section"><div class="wrap ck-wrap">
+
+  <div id="rpMissing" hidden><p style="color:var(--cherry)">We couldn't find your order details. Please go back and fill out the report form again.</p><a class="btn btn-primary" href="/shop">Back to Shop</a></div>
+
+  <div id="rpPay">
+    <div style="display:flex;gap:.6rem;max-width:420px;margin-bottom:1rem;align-items:flex-end">
+      <div style="flex:1"><label style="display:block;font-size:.8rem;color:var(--ink-soft);margin-bottom:.3rem">Coupon code (optional)</label><input type="text" id="ckCoupon" style="width:100%;padding:.7rem .9rem;border:1px solid var(--line-strong);border-radius:10px;font-family:var(--font-body);text-transform:uppercase" placeholder="e.g. TEST100"></div>
+      <button class="btn btn-ghost" id="ckApplyCoupon" type="button" style="white-space:nowrap">Apply</button>
+    </div>
+    <p id="ckCouponNote" class="ck-note" hidden style="margin:0 0 1rem"></p>
+    <div style="display:grid;gap:.7rem;max-width:420px">
+      <div><label style="display:block;font-size:.8rem;color:var(--ink-soft);margin-bottom:.3rem">Card number</label><div id="ckCardNumber" class="ck-field" style="min-height:44px"></div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
+        <div><label style="display:block;font-size:.8rem;color:var(--ink-soft);margin-bottom:.3rem">Expiry</label><div id="ckCardDate" class="ck-field" style="min-height:44px"></div></div>
+        <div><label style="display:block;font-size:.8rem;color:var(--ink-soft);margin-bottom:.3rem">CVV</label><div id="ckCardCvv" class="ck-field" style="min-height:44px"></div></div>
+      </div>
+      <div><label style="display:block;font-size:.8rem;color:var(--ink-soft);margin-bottom:.3rem">Postal code</label><div id="ckCardPostal" class="ck-field" style="min-height:44px"></div></div>
+    </div>
+    <button class="btn btn-gold" id="ckPayBtn" type="button" style="margin-top:1.2rem">Pay Now</button>
+    <p id="ckPayNote" class="ck-note" hidden></p>
+  </div>
+
+  <div class="ck-step" id="ckStepDone" hidden>
+    <div class="card reveal" style="text-align:center;border-color:var(--gold)">
+      <p class="eyebrow">Thank you</p>
+      <h2>Payment received</h2>
+      <p class="pull-refl" id="ckDoneText"></p>
+      <p style="color:var(--ink-soft);font-size:.9rem">Cherry will begin your report and send it to your email.</p>
+    </div>
+  </div>
+
+</div></section>
+</main>
+<footer class="footer">
+  <div class="wrap footer-grid">
+    <div>
+      <div class="footer-brand"><img src="assets/mark-clean.png" alt=""><span>Cherry Sage</span></div>
+      <p style="font-size:.9rem">Honest, accurate psychic, tarot, and numerology readings by phone. Trusted since 1999.</p>
+    </div>
+    <div><h4>Readings</h4><ul><li><a href="/psychic-reading">Psychic Reading</a></li><li><a href="/tarot">Tarot Card Reading</a></li><li><a href="/numerology">Numerology</a></li><li><a href="/how-it-works">How It Works</a></li></ul></div>
+    <div><h4>Explore</h4><ul><li><a href="/meet">Meet Cherry</a></li><li><a href="/blog">Blog</a></li><li><a href="/articles">Guest Articles</a></li><li><a href="/testimonials">Testimonials</a></li><li><a href="/policies">Policies</a></li></ul></div>
+    <div><h4>Free</h4><ul><li><a href="/tarot-pull">Free Tarot Pull</a></li><li><a href="/tarot-spread">Free Tarot Spread</a></li><li><a href="/life-path">Life Path Calculator</a></li><li><a href="/free-karmic-reading">Karmic Accumulation</a></li><li><a href="/horoscope">Daily Horoscope</a></li><li><a href="/feedback">Leave Feedback</a></li></ul></div>
+  </div>
+  <div class="wrap footer-bottom">© Cherry Sage. Serving clients worldwide since 1999. · Site by Balay ni Bruno &amp; Co.</div>
+</footer>
+<script src="https://checkout.clover.com/sdk.js"></script>
+<script>
+(function(){
+  var SUPABASE_URL='https://ctoeuikxoqlhnebgsygp.supabase.co';
+  var SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0b2V1aWt4b3FsaG5lYmdzeWdwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0ODM4NTMsImV4cCI6MjA5NjA1OTg1M30.Cy0uf8hm-Biea7a1V3bLQBz70f1oyhP83vHDjefTce8';
+
+  function money(cents){ return '$'+((cents||0)/100).toFixed(2); }
+
+  var params=new URLSearchParams(location.search);
+  var customerId=params.get('customer');
+  var productId=params.get('product');
+  var details=null;
+  try{ details=JSON.parse(sessionStorage.getItem('cs_report_details')||'null'); }catch(e){}
+
+  if(!customerId||!productId){
+    document.getElementById('rpMissing').hidden=false;
+    document.getElementById('rpPay').hidden=true;
+    document.getElementById('rpSummaryLede').textContent='Missing order details.';
+    return;
+  }
+
+  var product=null, appliedCoupon=null, currentPriceCents=null;
+
+  fetch(SUPABASE_URL+'/rest/v1/reading_products?select=id,name,price_cents&id=eq.'+encodeURIComponent(productId), {
+    headers:{apikey:SUPABASE_ANON, 'Accept-Profile':'cherry_sage'}
+  }).then(function(r){return r.json();}).then(function(rows){
+    if(!rows||!rows.length){ document.getElementById('rpSummaryLede').textContent='Could not find this product.'; return; }
+    product=rows[0]; currentPriceCents=product.price_cents;
+    document.getElementById('rpSummaryLede').textContent=product.name+', '+money(currentPriceCents)+'.';
+    initCloverFields();
+  }).catch(function(){ document.getElementById('rpSummaryLede').textContent='Could not load your order, please refresh.'; });
+
+  var CLOVER_PUBLIC_TOKEN='9cfc3848689bc857cafbfaa1f97b69a4';
+  var CLOVER_MERCHANT_ID='266062678880';
+  var cloverInstance=null, cloverCardNumber=null, cloverFieldsReady=false;
+
+  document.getElementById('ckApplyCoupon').addEventListener('click',function(){
+    var code=(document.getElementById('ckCoupon').value||'').trim();
+    var couponNote=document.getElementById('ckCouponNote');
+    if(!code){ couponNote.hidden=false; couponNote.textContent='Enter a code first.'; return; }
+    couponNote.hidden=false; couponNote.textContent='Checking…';
+    fetch(SUPABASE_URL+'/rest/v1/rpc/price_with_coupon',{
+      method:'POST',
+      headers:{apikey:SUPABASE_ANON,'Content-Type':'application/json','Content-Profile':'cherry_sage'},
+      body:JSON.stringify({ p_reading_product_id:productId, p_coupon_code:code, p_customer_id:customerId })
+    }).then(function(r){return r.json();}).then(function(rows){
+      var row=Array.isArray(rows)?rows[0]:rows;
+      if(!row||row.error){
+        couponNote.textContent=(row&&row.error)||'That code is not valid.';
+        appliedCoupon=null; currentPriceCents=product.price_cents;
+      }else{
+        appliedCoupon=code; currentPriceCents=row.final_price_cents;
+        couponNote.textContent='Coupon applied — new total '+money(currentPriceCents)+'.';
+      }
+      document.getElementById('rpSummaryLede').textContent=product.name+', '+money(currentPriceCents)+'.';
+    }).catch(function(){ couponNote.textContent='Could not check that code, please try again.'; });
+  });
+
+  function initCloverFields(){
+    if(cloverFieldsReady) return;
+    cloverFieldsReady=true;
+    if(!window.Clover){ document.getElementById('ckPayNote').hidden=false; document.getElementById('ckPayNote').textContent='Payment form could not load, please refresh the page.'; return; }
+    cloverInstance=new Clover(CLOVER_PUBLIC_TOKEN,{merchantId:CLOVER_MERCHANT_ID});
+    var elements=cloverInstance.elements();
+    cloverCardNumber=elements.create('CARD_NUMBER');
+    var cardDate=elements.create('CARD_DATE');
+    var cardCvv=elements.create('CARD_CVV');
+    var cardPostal=elements.create('CARD_POSTAL_CODE');
+    cloverCardNumber.mount('#ckCardNumber');
+    cardDate.mount('#ckCardDate');
+    cardCvv.mount('#ckCardCvv');
+    cardPostal.mount('#ckCardPostal');
+  }
+
+  document.getElementById('ckPayBtn').addEventListener('click',function(){
+    var payNote=document.getElementById('ckPayNote'), payBtn=this;
+    if(!cloverInstance){ payNote.hidden=false; payNote.textContent='Payment form is not ready yet, please wait a moment and try again.'; return; }
+    payNote.hidden=true; payBtn.disabled=true; payBtn.textContent='Processing…';
+    cloverInstance.createToken().then(function(result){
+      if(result.errors||!result.token){
+        payNote.hidden=false; payNote.textContent='Please check your card details and try again.';
+        payBtn.disabled=false; payBtn.textContent='Pay Now';
+        return;
+      }
+      fetch('/.netlify/functions/purchase-charge',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+        customerId:customerId, readingProductId:productId, cardToken:result.token, couponCode:appliedCoupon, details:details
+      })}).then(function(r){return r.json().then(function(d){return {ok:r.ok, data:d};});})
+      .then(function(res){
+        if(!res.ok||!res.data.ok){
+          payNote.hidden=false; payNote.textContent=(res.data&&res.data.error)||'Payment could not be completed, please try again.';
+          payBtn.disabled=false; payBtn.textContent='Pay Now';
+          return;
+        }
+        try{ sessionStorage.removeItem('cs_report_details'); }catch(e){}
+        document.getElementById('rpPay').hidden=true;
+        var done=document.getElementById('ckStepDone');
+        done.hidden=false;
+        document.getElementById('ckDoneText').textContent=res.data.product.name+', '+money(res.data.product.priceCents)+' — paid.';
+        done.scrollIntoView({behavior:'smooth',block:'center'});
+      }).catch(function(){
+        payNote.hidden=false; payNote.textContent='Something went wrong, please try again.';
+        payBtn.disabled=false; payBtn.textContent='Pay Now';
+      });
+    }).catch(function(){
+      payNote.hidden=false; payNote.textContent='Please check your card details and try again.';
+      payBtn.disabled=false; payBtn.textContent='Pay Now';
+    });
+  });
+})();
+</script>
+</body>
+</html>
