@@ -53,16 +53,16 @@
   <div id="dashGate" class="dash-gate">
     <p class="eyebrow">Cherry Sage</p>
     <h1 style="font-size:1.5rem;margin:.2rem 0 1rem">Your Dashboard</h1>
-    <p style="color:var(--ink-soft);font-size:.92rem">Enter your email and we'll send you a one-click sign-in link. No password to remember.</p>
-    <input type="email" id="gateEmail" placeholder="you@cherrysage.com" autocomplete="email">
-    <button class="btn btn-primary" id="gateSend" style="width:100%">Send my sign-in link</button>
+    <p style="color:var(--ink-soft);font-size:.92rem">Enter your PIN to open it.</p>
+    <input type="password" inputmode="numeric" id="gatePin" placeholder="PIN" autocomplete="off">
+    <button class="btn btn-primary" id="gateSend" style="width:100%">Open Dashboard</button>
     <p class="msg" id="gateMsg"></p>
   </div>
 
   <div id="dashApp" hidden>
     <div class="dash-header">
       <h1>Cherry Sage Dashboard</h1>
-      <div class="dash-who">Signed in as <strong id="whoEmail"></strong> · <a href="#" id="signOut">Sign out</a></div>
+      <div class="dash-who"><a href="#" id="signOut">Lock dashboard</a></div>
     </div>
 
     <div class="dash-tabs">
@@ -109,53 +109,30 @@
 
 <script>
 (function(){
-  var SUPABASE_URL='https://ctoeuikxoqlhnebgsygp.supabase.co';
-  var SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0b2V1aWt4b3FsaG5lYmdzeWdwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0ODM4NTMsImV4cCI6MjA5NjA1OTg1M30.Cy0uf8hm-Biea7a1V3bLQBz70f1oyhP83vHDjefTce8';
   var gate=document.getElementById('dashGate'), app=document.getElementById('dashApp');
   var gateMsg=document.getElementById('gateMsg');
 
   function money(c){ return '$'+((c||0)/100).toFixed(2); }
   function esc(s){ return String(s||'').replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
 
-  // --- Handle magic-link callback (tokens arrive in the URL hash) ---
-  function parseHashTokens(){
-    var h=location.hash.replace(/^#/,'');
-    if(!h) return null;
-    var p=new URLSearchParams(h);
-    var at=p.get('access_token');
-    if(!at) return null;
-    return { access_token:at, refresh_token:p.get('refresh_token'), expires_at:p.get('expires_at') };
-  }
-  var incoming=parseHashTokens();
-  if(incoming){
-    sessionStorage.setItem('cs_dash_session', JSON.stringify(incoming));
-    history.replaceState(null,'',location.pathname);
-  }
+  function getPin(){ try{ return sessionStorage.getItem('cs_dash_pin')||''; }catch(e){ return ''; } }
 
-  function getSession(){
-    try{ return JSON.parse(sessionStorage.getItem('cs_dash_session')||'null'); }catch(e){ return null; }
-  }
-
-  async function tryEnterApp(){
-    var sess=getSession();
-    if(!sess||!sess.access_token) return false;
+  async function tryEnterApp(pin){
+    pin = pin || getPin();
+    if(!pin) return false;
     var res;
     try{
-      res=await fetch('/.netlify/functions/dashboard-summary',{headers:{Authorization:'Bearer '+sess.access_token}});
+      res=await fetch('/.netlify/functions/dashboard-summary',{headers:{'x-dashboard-pin':pin}});
     }catch(e){ return false; }
-    if(res.status===401){ sessionStorage.removeItem('cs_dash_session'); return false; }
     if(res.status===403){
       gateMsg.className='msg err';
-      gateMsg.textContent="That email isn't set up for dashboard access yet. Ask RJ to add it.";
-      sessionStorage.removeItem('cs_dash_session');
+      gateMsg.textContent='Wrong PIN, try again.';
+      sessionStorage.removeItem('cs_dash_pin');
       return false;
     }
     if(!res.ok) return false;
     var data=await res.json();
-    // pull the email out of the JWT for display, without needing a full auth SDK
-    var email='';
-    try{ email=JSON.parse(atob(sess.access_token.split('.')[1])).email||''; }catch(e){}
-    document.getElementById('whoEmail').textContent=email;
+    try{ sessionStorage.setItem('cs_dash_pin', pin); }catch(e){}
     gate.hidden=true; app.hidden=false;
     renderHome(data);
     renderCrm(data);
@@ -164,30 +141,19 @@
   }
 
   document.getElementById('gateSend').addEventListener('click', async function(){
-    var email=document.getElementById('gateEmail').value.trim();
-    if(!email){ gateMsg.className='msg err'; gateMsg.textContent='Enter your email first.'; return; }
-    gateMsg.className='msg'; gateMsg.textContent='Sending...';
-    try{
-      var res=await fetch(SUPABASE_URL+'/auth/v1/otp',{
-        method:'POST',
-        headers:{apikey:SUPABASE_ANON,'Content-Type':'application/json'},
-        body:JSON.stringify({email:email, create_user:true, options:{email_redirect_to: location.origin+'/dashboard.html'}})
-      });
-      if(res.ok){
-        gateMsg.className='msg ok';
-        gateMsg.textContent='Check your email, we sent you a one-click sign-in link.';
-      }else{
-        gateMsg.className='msg err';
-        gateMsg.textContent='Could not send the link. Please try again.';
-      }
-    }catch(e){
-      gateMsg.className='msg err'; gateMsg.textContent='Could not reach the server. Please try again.';
-    }
+    var pin=document.getElementById('gatePin').value.trim();
+    if(!pin){ gateMsg.className='msg err'; gateMsg.textContent='Enter your PIN first.'; return; }
+    gateMsg.className='msg'; gateMsg.textContent='Checking...';
+    var ok=await tryEnterApp(pin);
+    if(!ok && gateMsg.textContent==='Checking...'){ gateMsg.className='msg err'; gateMsg.textContent='Could not reach the server. Please try again.'; }
+  });
+  document.getElementById('gatePin').addEventListener('keydown', function(e){
+    if(e.key==='Enter') document.getElementById('gateSend').click();
   });
 
   document.getElementById('signOut').addEventListener('click', function(e){
     e.preventDefault();
-    sessionStorage.removeItem('cs_dash_session');
+    sessionStorage.removeItem('cs_dash_pin');
     location.reload();
   });
 

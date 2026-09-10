@@ -1,6 +1,8 @@
-// Cherry Sage — Bev's dashboard home. Authenticated via Supabase Auth (magic link); every number
-// here comes from a real system (Supabase for bookings, Netlify Blobs for contact-form leads,
-// Brevo for email marketing), nothing is invented or placeholder.
+// Cherry Sage — Bev's dashboard home. Gated by a short PIN (Bev's call, 2026-09-10 -- no email
+// sign-in step). The PIN is checked inside dashboard_summary() itself, a SECURITY DEFINER
+// function, so this is a real server-side check, not just a UI prompt someone could skip by
+// calling the function directly. Every number here comes from a real system (Supabase for
+// bookings, Netlify Blobs for contact-form leads, Brevo for email marketing), nothing invented.
 import { createClient } from "@supabase/supabase-js";
 import { getStore } from "@netlify/blobs";
 
@@ -16,18 +18,14 @@ export default async (req) => {
   const BREVO_KEY = process.env.BREVO_KEY;
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return json({ error: "not configured" }, 503);
 
-  const authHeader = req.headers.get("authorization") || "";
-  const accessToken = authHeader.replace(/^Bearer\s+/i, "");
-  if (!accessToken) return json({ error: "sign in required" }, 401);
+  const pin = req.headers.get("x-dashboard-pin") || "";
+  if (!pin) return json({ error: "pin required" }, 401);
 
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    db: { schema: "cherry_sage" },
-    global: { headers: { Authorization: `Bearer ${accessToken}` } },
-  });
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { db: { schema: "cherry_sage" } });
 
-  const { data: summary, error: rpcErr } = await supabase.rpc("dashboard_summary");
+  const { data: summary, error: rpcErr } = await supabase.rpc("dashboard_summary", { p_pin: pin });
   if (rpcErr) {
-    const msg = /unauthorized/i.test(rpcErr.message || "") ? "not authorized for this dashboard" : "could not load summary";
+    const msg = /unauthorized/i.test(rpcErr.message || "") ? "wrong pin" : "could not load summary";
     return json({ error: msg }, rpcErr.message?.includes("unauthorized") ? 403 : 500);
   }
 
