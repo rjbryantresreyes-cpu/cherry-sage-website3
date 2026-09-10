@@ -42,8 +42,9 @@ export default async (req) => {
     }).length;
   } catch { /* blobs unavailable in some contexts; leave at 0 */ }
 
-  // Brevo: contact list size + the most recent campaign's real stats.
-  let brevo = { contactCount: null, recentCampaigns: [] };
+  // Brevo: contact list size, every real list with its own count, total campaigns ever sent,
+  // and the most recent campaigns' real stats. Mirrors BBC's own /os/crm.html tile+list pattern.
+  let brevo = { contactCount: null, recentCampaigns: [], lists: [], campaignCount: null };
   if (BREVO_KEY) {
     try {
       const contactsRes = await fetch("https://api.brevo.com/v3/contacts?limit=1", {
@@ -52,6 +53,26 @@ export default async (req) => {
       if (contactsRes.ok) {
         const cData = await contactsRes.json();
         brevo.contactCount = typeof cData.count === "number" ? cData.count : null;
+      }
+    } catch { /* non-fatal */ }
+    try {
+      const listsRes = await fetch("https://api.brevo.com/v3/contacts/lists?limit=50&sort=desc", {
+        headers: { "api-key": BREVO_KEY, accept: "application/json" },
+      });
+      if (listsRes.ok) {
+        const lData = await listsRes.json();
+        brevo.lists = (lData.lists || []).map((l) => ({
+          id: l.id, name: l.name, totalSubscribers: l.totalSubscribers ?? l.uniqueSubscribers ?? null,
+        }));
+      }
+    } catch { /* non-fatal */ }
+    try {
+      const campCountRes = await fetch("https://api.brevo.com/v3/emailCampaigns?limit=1&status=sent", {
+        headers: { "api-key": BREVO_KEY, accept: "application/json" },
+      });
+      if (campCountRes.ok) {
+        const ccData = await campCountRes.json();
+        brevo.campaignCount = typeof ccData.count === "number" ? ccData.count : null;
       }
     } catch { /* non-fatal */ }
     try {
@@ -72,9 +93,27 @@ export default async (req) => {
     } catch { /* non-fatal */ }
   }
 
+  // Same-PIN changelog/task store (sage-updates.mjs), folded in here so the dashboard makes one
+  // fetch for everything. Never fails the whole summary if Blobs has a hiccup.
+  let updates = { website: [], crm: [], today: [], bevTodos: [], rjTasks: [] };
+  try {
+    const store = getStore("sage-updates");
+    const { blobs } = await store.list();
+    const items = (await Promise.all(blobs.map((b) => store.get(b.key, { type: "json" }))))
+      .filter(Boolean)
+      .sort((a, b) => b.created_at.localeCompare(a.created_at));
+    const todayStr = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+    updates.website = items.filter((i) => i.category === "website");
+    updates.crm = items.filter((i) => i.category === "crm" || i.category === "email");
+    updates.today = items.filter((i) => i.created_at.slice(0, 10) === todayStr && i.category !== "task" && i.category !== "bev_todo");
+    updates.bevTodos = items.filter((i) => i.category === "bev_todo" && !i.done);
+    updates.rjTasks = items.filter((i) => i.category === "task");
+  } catch { /* non-fatal */ }
+
   return json({
     ...summary,
     leads: { total: totalLeads, last30Days: recentLeads },
     brevo,
+    updates,
   });
 };

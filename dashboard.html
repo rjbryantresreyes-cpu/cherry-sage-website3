@@ -52,6 +52,18 @@
   .website-card p{color:var(--ink-soft);margin:.6rem 0 1.4rem}
   .sitemap-search{width:100%;max-width:360px;padding:.7rem 1rem;border:1px solid var(--line-strong);border-radius:999px;font-family:var(--font-body);margin-bottom:1.2rem}
   .soon-note{color:var(--ink-soft);text-align:center;padding:3rem 1rem}
+  .website-actions{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap;margin-bottom:2rem}
+  .change-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.7rem}
+  .change-list li{background:var(--cream);border:1px solid var(--line);border-radius:var(--r);padding:.8rem 1rem;font-size:.88rem;display:flex;gap:.7rem;align-items:baseline}
+  .change-list .chdate{flex:0 0 auto;color:var(--gold);font-weight:600;font-size:.78rem;white-space:nowrap}
+  .change-list .chtext{color:var(--ink)}
+  .todo-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.6rem}
+  .todo-list li{display:flex;align-items:flex-start;gap:.7rem;background:var(--cream);border:1px solid var(--line);border-radius:var(--r);padding:.75rem 1rem;font-size:.9rem}
+  .todo-list input[type=checkbox]{margin-top:.2rem;width:18px;height:18px;accent-color:var(--oxblood);cursor:pointer;flex:0 0 auto}
+  .todo-list .done{color:var(--ink-soft);text-decoration:line-through}
+  .todo-add{display:flex;gap:.6rem;margin-top:.8rem}
+  .todo-add input{flex:1;padding:.6rem .9rem;border:1px solid var(--line-strong);border-radius:999px;font-family:var(--font-body);font-size:.88rem}
+  .todo-add button{flex:0 0 auto}
 </style>
 </head>
 <body>
@@ -85,15 +97,22 @@
       <div class="stat-grid" id="homeStats"></div>
       <h2 class="dash-section-title">Email marketing</h2>
       <div id="homeBrevo"></div>
+      <h2 class="dash-section-title">What we did today</h2>
+      <div id="homeToday"></div>
+      <h2 class="dash-section-title">What's on you, Bev</h2>
+      <div id="homeBevTodos"></div>
+      <h2 class="dash-section-title">Our task list</h2>
+      <div id="homeTasks"></div>
+      <div class="todo-add"><input type="text" id="taskInput" placeholder="Add a task..."><button class="btn btn-ghost" id="taskAdd" type="button">Add</button></div>
     </div>
 
     <div class="dash-panel" id="panel-website">
-      <div class="website-card">
-        <p class="eyebrow">Website backend</p>
-        <h2 style="margin:.2rem 0">Edit your pages</h2>
-        <p>Create new pages, edit text and photos on your Guest Articles, and manage your content, all from here.</p>
+      <div class="website-actions">
+        <a class="btn btn-primary" href="/" target="_blank" rel="noopener">View live site</a>
         <a class="btn btn-gold" href="/editor-preview/admin/">Open your website editor</a>
       </div>
+      <h2 class="dash-section-title">Changes we made to your website</h2>
+      <div id="websiteChanges"></div>
     </div>
 
     <div class="dash-panel" id="panel-crm">
@@ -103,6 +122,10 @@
       <div id="crmAppointments"></div>
       <h2 class="dash-section-title">Contact-form leads</h2>
       <div id="crmLeads"></div>
+      <h2 class="dash-section-title">Email lists</h2>
+      <div id="crmLists"></div>
+      <h2 class="dash-section-title">Changes we made to your CRM &amp; email</h2>
+      <div id="crmChanges"></div>
     </div>
 
     <div class="dash-panel" id="panel-sitemap">
@@ -141,10 +164,36 @@
     var data=await res.json();
     try{ sessionStorage.setItem('cs_dash_pin', pin); }catch(e){}
     gate.hidden=true; app.hidden=false;
+    lastData=data;
     renderHome(data);
+    renderWebsite(data);
     renderCrm(data);
     loadSitemap();
     return true;
+  }
+  var lastData=null;
+
+  function changeListHtml(items){
+    if(!items || !items.length) return '<p class="empty-note">Nothing logged yet.</p>';
+    return '<ul class="change-list">'+items.map(function(i){
+      return '<li><span class="chdate">'+esc((i.created_at||'').slice(0,10))+'</span><span class="chtext">'+esc(i.text)+'</span></li>';
+    }).join('')+'</ul>';
+  }
+
+  async function postUpdate(body){
+    var res=await fetch('/.netlify/functions/sage-updates',{
+      method:'POST', headers:{'content-type':'application/json','x-dashboard-pin':getPin()},
+      body:JSON.stringify(body),
+    });
+    return res.ok;
+  }
+
+  async function refreshAndRender(){
+    var res=await fetch('/.netlify/functions/dashboard-summary',{headers:{'x-dashboard-pin':getPin()}});
+    if(!res.ok) return;
+    var data=await res.json();
+    lastData=data;
+    renderHome(data); renderWebsite(data); renderCrm(data);
   }
 
   document.getElementById('gateSend').addEventListener('click', async function(){
@@ -203,6 +252,32 @@
       html+='<p class="empty-note">No sent campaigns yet.</p>';
     }
     document.getElementById('homeBrevo').innerHTML=html;
+
+    var u=d.updates||{};
+    document.getElementById('homeToday').innerHTML=changeListHtml(u.today);
+
+    document.getElementById('homeBevTodos').innerHTML = (u.bevTodos && u.bevTodos.length)
+      ? '<ul class="todo-list">'+u.bevTodos.map(function(t){
+          return '<li><span style="flex:1">'+esc(t.text)+'</span></li>';
+        }).join('')+'</ul>'
+      : '<p class="empty-note">Nothing waiting on you right now.</p>';
+
+    var tasks=(u.rjTasks||[]).slice().sort(function(a,b){ return (a.done?1:0)-(b.done?1:0); });
+    document.getElementById('homeTasks').innerHTML = tasks.length
+      ? '<ul class="todo-list">'+tasks.map(function(t){
+          return '<li><input type="checkbox" data-id="'+esc(t.id)+'" '+(t.done?'checked':'')+'><span class="'+(t.done?'done':'')+'" style="flex:1">'+esc(t.text)+'</span></li>';
+        }).join('')+'</ul>'
+      : '<p class="empty-note">No tasks logged.</p>';
+    document.querySelectorAll('#homeTasks input[type=checkbox]').forEach(function(cb){
+      cb.addEventListener('change', async function(){
+        await postUpdate({action:'toggle', id:cb.dataset.id});
+        refreshAndRender();
+      });
+    });
+  }
+
+  function renderWebsite(d){
+    document.getElementById('websiteChanges').innerHTML = changeListHtml((d.updates||{}).website);
   }
 
   function renderCrm(d){
@@ -221,6 +296,18 @@
       : '<p class="empty-note">Nothing pending right now.</p>';
 
     document.getElementById('crmLeads').innerHTML = '<p class="empty-note">'+d.leads.total+' total contact-form submissions, '+d.leads.last30Days+' in the last 30 days.</p>';
+
+    var b=d.brevo||{};
+    var listsHtml='';
+    listsHtml+='<div class="stat-grid" style="margin-bottom:1rem"><div class="stat-card"><div class="num">'+(b.campaignCount==null?'—':b.campaignCount)+'</div><div class="label">Campaigns sent, all time</div></div></div>';
+    listsHtml += (b.lists && b.lists.length)
+      ? '<table class="dash-table"><thead><tr><th>List</th><th>Contacts</th></tr></thead><tbody>'+
+        b.lists.map(function(l){ return '<tr><td>'+esc(l.name)+'</td><td>'+(l.totalSubscribers==null?'—':l.totalSubscribers)+'</td></tr>'; }).join('')+
+        '</tbody></table>'
+      : '<p class="empty-note">No lists found.</p>';
+    document.getElementById('crmLists').innerHTML=listsHtml;
+
+    document.getElementById('crmChanges').innerHTML = changeListHtml((d.updates||{}).crm);
   }
 
   var sitemapPages=[];
@@ -251,6 +338,18 @@
   document.getElementById('sitemapSearch').addEventListener('input', function(){
     var q=this.value.toLowerCase();
     renderSitemap(sitemapPages.filter(function(p){ return p.loc.toLowerCase().indexOf(q)>-1; }));
+  });
+
+  document.getElementById('taskAdd').addEventListener('click', async function(){
+    var input=document.getElementById('taskInput');
+    var text=input.value.trim();
+    if(!text) return;
+    input.value='';
+    await postUpdate({action:'add', category:'task', text:text});
+    refreshAndRender();
+  });
+  document.getElementById('taskInput').addEventListener('keydown', function(e){
+    if(e.key==='Enter') document.getElementById('taskAdd').click();
   });
 
   if('serviceWorker' in navigator){
