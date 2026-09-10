@@ -12,6 +12,7 @@
 //   and paid:true on a real charge response -- the DB function no longer trusts a caller's
 //   claimed payment id, but this is the actual point where the real verification happens.
 import { createClient } from "@supabase/supabase-js";
+import { getStore } from "@netlify/blobs";
 
 const CLOVER_API_BASE = "https://api.clover.com";
 const SERVER_KEY = "CherrySage-hours-2026"; // matches confirm_paid_booking's hardcoded gate
@@ -20,6 +21,49 @@ function json(o, status = 200) {
   return new Response(JSON.stringify(o), {
     status, headers: { "content-type": "application/json", "cache-control": "no-store" },
   });
+}
+
+// Card-testing defense (real incident, 2026-09-11: Bev's WooCommerce shop took 1000+ fraudulent
+// charge attempts from bots running stolen cards). This endpoint is the one place a real card
+// gets charged, so it is the one place that attack lands here too. Two independent limits, both
+// scoped per IP via a Blobs counter (no external service needed):
+//   - a flat attempt cap, so a script can't hammer this endpoint at all;
+//   - a tighter DECLINE cap, since "many different cards, mostly declined" is the actual
+//     signature of card testing, not just high volume from one real customer.
+// Never blocks on Blobs being unavailable -- a monitoring failure must not take checkout down.
+const RATE_WINDOW_MS = 10 * 60 * 1000;
+const MAX_ATTEMPTS_PER_WINDOW = 8;
+const MAX_DECLINES_PER_WINDOW = 3;
+const BLOCK_MS = 30 * 60 * 1000;
+
+async function checkAndRecordAttempt(ip) {
+  try {
+    const store = getStore("checkout-abuse");
+    const key = `ip:${ip}`;
+    const now = Date.now();
+    const rec = (await store.get(key, { type: "json" })) || { attempts: [], declines: [], blockedUntil: 0 };
+    if (rec.blockedUntil && rec.blockedUntil > now) return { blocked: true, reason: "cooling down after repeated declines" };
+    rec.attempts = rec.attempts.filter((t) => now - t < RATE_WINDOW_MS);
+    rec.declines = rec.declines.filter((t) => now - t < RATE_WINDOW_MS);
+    if (rec.attempts.length >= MAX_ATTEMPTS_PER_WINDOW) {
+      rec.blockedUntil = now + BLOCK_MS;
+      await store.setJSON(key, rec);
+      return { blocked: true, reason: "too many attempts" };
+    }
+    rec.attempts.push(now);
+    await store.setJSON(key, rec);
+    return { blocked: false, record: rec, store, key };
+  } catch { return { blocked: false }; } // Blobs hiccup -- fail open, never block real checkouts on it
+}
+
+async function recordDecline(store, key, rec) {
+  if (!store || !rec) return;
+  try {
+    const now = Date.now();
+    rec.declines.push(now);
+    if (rec.declines.length >= MAX_DECLINES_PER_WINDOW) rec.blockedUntil = now + BLOCK_MS;
+    await store.setJSON(key, rec);
+  } catch { /* non-fatal */ }
 }
 
 export default async (req) => {
@@ -31,6 +75,13 @@ export default async (req) => {
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY || !CLOVER_PRIVATE_TOKEN) {
     return json({ error: "not configured" }, 503);
   }
+
+  const clientIp = req.headers.get("x-nf-client-connection-ip") || "unknown";
+  const abuse = await checkAndRecordAttempt(clientIp);
+  if (abuse.blocked) {
+    return json({ error: "Too many attempts from this connection. Please try again later or contact Cherry Sage directly." }, 429);
+  }
+
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { db: { schema: "cherry_sage" } });
 
   let d = {};
@@ -114,10 +165,12 @@ export default async (req) => {
   raw = await cloverRes.text();
   try { charge = raw ? JSON.parse(raw) : {}; } catch { charge = {}; }
   if (!cloverRes.ok) {
+    await recordDecline(abuse.store, abuse.key, abuse.record);
     return json({ error: charge?.message || raw?.slice(0, 200) || "Card was declined. Please try a different card." }, 402);
   }
 
   if (charge.status !== "succeeded" || charge.paid !== true) {
+    await recordDecline(abuse.store, abuse.key, abuse.record);
     return json({ error: "Payment did not complete. Please try again." }, 402);
   }
   } // end finalPriceCents === 0 ? / else

@@ -4,6 +4,7 @@
 // separate, later step by design (see project memory 2026-09-08: not rushing live Clover
 // charge code without dedicated testing).
 import { createClient } from "@supabase/supabase-js";
+import { getStore } from "@netlify/blobs";
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -13,8 +14,31 @@ function json(o, status = 200) {
   });
 }
 
+// Same abuse-defense family as checkout-charge.mjs (real incident, 2026-09-11) -- this is the
+// entry point before a charge ever happens, so capping hold creation per IP stops slot-hold
+// spam/exhaustion even before someone reaches the payment step. Fails open on a Blobs hiccup.
+async function tooManyStarts(ip) {
+  try {
+    const store = getStore("checkout-abuse");
+    const key = `start-ip:${ip}`;
+    const now = Date.now();
+    const windowMs = 10 * 60 * 1000;
+    const rec = (await store.get(key, { type: "json" })) || { attempts: [] };
+    rec.attempts = rec.attempts.filter((t) => now - t < windowMs);
+    if (rec.attempts.length >= 15) return true;
+    rec.attempts.push(now);
+    await store.setJSON(key, rec);
+    return false;
+  } catch { return false; }
+}
+
 export default async (req) => {
   if (req.method !== "POST") return json({ error: "method" }, 405);
+
+  const clientIp = req.headers.get("x-nf-client-connection-ip") || "unknown";
+  if (await tooManyStarts(clientIp)) {
+    return json({ error: "Too many attempts from this connection. Please try again later." }, 429);
+  }
 
   const SUPABASE_URL = process.env.SUPABASE_URL;
   const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
