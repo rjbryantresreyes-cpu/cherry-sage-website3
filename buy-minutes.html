@@ -15,26 +15,54 @@
 <link rel="icon" href="assets/icon-32.png?v=2" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="assets/icon-180.png?v=2">
 <style>
-.ck-wrap{max-width:640px;margin:0 auto}
-.ck-step{margin-bottom:2.2rem;padding-bottom:2.2rem;border-bottom:1px solid var(--line)}
+.ck-layout{display:grid;grid-template-columns:1.55fr 1fr;gap:clamp(1.6rem,4vw,2.8rem);align-items:start;grid-template-areas:"main side"}
+.ck-main{grid-area:main;min-width:0}
+.ck-side{grid-area:side;display:flex;flex-direction:column;gap:1.1rem;position:sticky;top:6.5rem}
+
+/* progress bar */
+.ck-progress{display:flex;align-items:center;margin-bottom:2.2rem}
+.ck-progress-step{display:flex;align-items:center;gap:.55rem;font-size:.82rem;font-weight:600;color:var(--ink-soft);white-space:nowrap}
+.ck-progress-dot{width:26px;height:26px;border-radius:50%;border:2px solid var(--line-strong);background:var(--cream);
+  display:flex;align-items:center;justify-content:center;font-family:var(--font-body);font-size:.78rem;color:var(--ink-soft);flex-shrink:0;transition:all .2s ease}
+.ck-progress-step.on .ck-progress-dot{border-color:var(--oxblood);background:var(--oxblood);color:var(--cream)}
+.ck-progress-step.on{color:var(--oxblood)}
+.ck-progress-step.done .ck-progress-dot{border-color:var(--gold);background:var(--gold);color:var(--oxblood-deep)}
+.ck-progress-step.done{color:var(--ink)}
+.ck-progress-line{flex:1;height:2px;background:var(--line-strong);margin:0 .5rem;transition:background .2s ease}
+.ck-progress-line.done{background:var(--gold)}
+
+.ck-step{margin-bottom:2.4rem;padding-bottom:2.4rem;border-bottom:1px solid var(--line)}
 .ck-step:last-child{border-bottom:0}
-.ck-step-num{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:var(--oxblood);color:#fff;font-size:.85rem;font-weight:700;margin-right:.6rem;flex-shrink:0}
-.ck-step h2{display:flex;align-items:center;font-size:1.2rem;margin:0 0 1rem}
-.ck-products{display:grid;gap:.7rem}
-.ck-product{display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:1rem 1.2rem;border:1px solid var(--line-strong);border-radius:12px;cursor:pointer;background:#fff;text-align:left}
-.ck-product:hover{border-color:var(--gold)}
-.ck-product.on{border-color:var(--oxblood);background:var(--paper-2);box-shadow:0 0 0 1px var(--oxblood)}
-.ck-product-name{font-weight:600;color:var(--oxblood)}
-.ck-product-sub{font-size:.82rem;color:var(--ink-soft)}
-.ck-product-price{font-weight:700;color:var(--gold);font-size:1.05rem;white-space:nowrap}
-.ck-field{padding:.8rem 1rem;border:1px solid var(--line-strong);border-radius:12px;font-family:var(--font-body);width:100%}
-.ck-summary{background:var(--paper-2);border:1px solid var(--line);border-radius:12px;padding:1.2rem 1.4rem;margin-bottom:1.2rem}
-.ck-summary dt{font-size:.78rem;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);margin-top:.6rem}
-.ck-summary dt:first-child{margin-top:0}
-.ck-summary dd{margin:.1rem 0 0;font-weight:600;color:var(--ink)}
+.ck-step h2{font-size:1.25rem;margin:0 0 1.1rem;color:var(--oxblood)}
+.ck-locked{opacity:.35;pointer-events:none}
+
+/* pricing cards */
+.ck-products{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:.8rem}
+.ck-pcard{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:.3rem;
+  padding:1.15rem 1.1rem;border:1.5px solid var(--line-strong);border-radius:var(--r);cursor:pointer;
+  background:var(--cream);text-align:left;transition:border-color .15s ease,box-shadow .15s ease,transform .15s ease}
+.ck-pcard:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:var(--shadow-sm)}
+.ck-pcard.on{border-color:var(--oxblood);box-shadow:0 0 0 1px var(--oxblood),var(--shadow-sm);background:var(--paper-2)}
+.ck-pcard-check{position:absolute;top:.7rem;right:.7rem;width:18px;height:18px;border-radius:50%;background:var(--oxblood);
+  color:var(--cream);font-size:.68rem;display:flex;align-items:center;justify-content:center;opacity:0;transform:scale(.6);transition:all .15s ease}
+.ck-pcard.on .ck-pcard-check{opacity:1;transform:scale(1)}
+.ck-pcard-dur{font-family:var(--font-display);font-weight:600;font-size:1.7rem;color:var(--oxblood);line-height:1}
+.ck-pcard-dur small{font-family:var(--font-body);font-weight:600;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);margin-left:.2rem}
+.ck-pcard-name{font-size:.78rem;color:var(--ink-soft)}
+.ck-pcard-first{display:inline-block;font-size:.63rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--gold);background:rgba(192,151,47,.14);padding:.15rem .45rem;border-radius:999px;margin-bottom:.15rem}
+.ck-pcard-price{font-family:var(--font-display);font-weight:600;font-size:1.05rem;color:var(--ink);margin-top:.15rem}
+
+.ck-field{padding:.8rem 1rem;border:1px solid var(--line-strong);border-radius:12px;font-family:var(--font-body);width:100%;background:var(--cream)}
+.ck-field:focus-within{border-color:var(--gold)}
 .ck-note{font-size:.85rem;color:var(--cherry);margin-top:.6rem}
-.ck-locked{opacity:.4;pointer-events:none}
-.ck-secure{display:flex;gap:.9rem;align-items:flex-start;background:var(--paper-2);border:1px solid var(--line);border-radius:12px;padding:1rem 1.2rem;margin-bottom:1.8rem}
+
+/* payment panel */
+.ck-pay-panel{background:var(--cream);border:1px solid var(--line);border-radius:var(--r-lg);padding:1.5rem 1.5rem 1.7rem;box-shadow:var(--shadow-sm)}
+.ck-pay-panel h3{font-size:.95rem;color:var(--ink);margin:0 0 1rem;font-family:var(--font-body);font-weight:700}
+
+/* trust badge (checkout security) */
+.ck-secure{display:flex;gap:.9rem;align-items:flex-start;background:var(--paper-2);border:1px solid var(--line);border-radius:12px;padding:1rem 1.2rem;margin-bottom:1.6rem}
 .ck-secure svg{flex-shrink:0;width:24px;height:24px;color:var(--oxblood);margin-top:.15rem}
 .ck-secure strong{display:block;color:var(--oxblood);font-size:.92rem;margin-bottom:.25rem}
 .ck-secure p{margin:0;font-size:.82rem;color:var(--ink-soft);line-height:1.55}
@@ -42,6 +70,28 @@
 .ck-secure-marks span{font-size:.7rem;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);border:1px solid var(--line-strong);border-radius:6px;padding:.25rem .55rem;white-space:nowrap}
 .ck-pay-secure{display:flex;align-items:center;gap:.4rem;font-size:.78rem;color:var(--ink-soft);margin-top:.7rem}
 .ck-pay-secure svg{width:15px;height:15px;color:var(--oxblood);flex-shrink:0}
+.ck-cards-accepted{font-size:.76rem;color:var(--ink-soft);margin-top:.5rem}
+
+/* order summary sidebar */
+.ck-side-card{background:var(--cream);border:1px solid var(--line);border-radius:var(--r-lg);padding:1.4rem 1.5rem;box-shadow:var(--shadow-sm)}
+.ck-side-label{font-family:var(--font-body);text-transform:uppercase;letter-spacing:.12em;font-size:.72rem;font-weight:700;color:var(--gold);margin:0 0 1rem}
+.ck-side-empty{font-size:.85rem;color:var(--ink-soft);margin:0}
+.ck-side-row{display:flex;justify-content:space-between;gap:1rem;font-size:.92rem;color:var(--ink);padding-bottom:.9rem;margin-bottom:.9rem;border-bottom:1px solid var(--line)}
+.ck-side-row span:last-child{font-weight:600;white-space:nowrap}
+.ck-side-total{display:flex;justify-content:space-between;align-items:baseline}
+.ck-side-total span:first-child{font-size:.85rem;color:var(--ink-soft)}
+.ck-side-total span:last-child{font-family:var(--font-display);font-weight:600;font-size:1.5rem;color:var(--oxblood)}
+.ck-side-coupon-tag{font-size:.76rem;color:var(--gold);margin-top:.4rem}
+.ck-side-trust{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--r-lg);padding:1.2rem 1.4rem;text-align:center}
+.ck-stars{color:var(--gold);font-size:1.1rem;letter-spacing:.15em;margin-bottom:.3rem}
+.ck-side-trust p{margin:0;font-size:.82rem;color:var(--ink-soft)}
+.ck-side-trust strong{color:var(--oxblood)}
+.ck-side-since{font-size:.78rem;color:var(--ink-soft);text-align:center;margin:0}
+
+@media (max-width:860px){
+  .ck-layout{grid-template-columns:1fr;grid-template-areas:"side" "main"}
+  .ck-side{position:static;flex-direction:column-reverse}
+}
 </style>
 </head>
 <body>
@@ -57,66 +107,98 @@
 </header>
 <main>
 <section class="page-hero banner"><div class="ph-glow" aria-hidden="true"></div><div class="ph-stars" aria-hidden="true"></div><div class="wrap reveal"><p class="eyebrow">Shop &middot; Buy Minutes</p><h1>Buy Minutes</h1><p class="lede">Pay now, then call or email Cherry whenever you're ready. No appointment needed for this one.</p></div></section>
-<section class="section"><div class="wrap ck-wrap">
+<section class="section"><div class="wrap">
 
-  <div class="ck-secure">
-    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-    <div>
-      <strong>Secure, encrypted checkout</strong>
-      <p>Your card number is encrypted the moment you type it and processed directly by Clover, a PCI-compliant payment processor used by businesses worldwide. It never touches Cherry Sage's servers, and no one at Cherry Sage ever sees your full card number.</p>
-      <div class="ck-secure-marks"><span>256-bit encryption</span><span>PCI-DSS compliant</span><span>Processed by Clover</span></div>
-    </div>
-  </div>
+  <div class="ck-layout">
+    <div class="ck-main">
 
-  <div class="ck-step" id="ckStepProduct">
-    <h2><span class="ck-step-num">1</span>Choose your minutes</h2>
-    <div class="ck-products" id="ckProducts"><p style="color:var(--ink-soft)">Loading…</p></div>
-  </div>
-
-  <div class="ck-step ck-locked" id="ckStepInfo">
-    <h2><span class="ck-step-num">2</span>Your information</h2>
-    <form id="ckForm" style="display:grid;gap:.8rem">
-      <input type="text" name="name" placeholder="Your name" required class="ck-field">
-      <input type="email" name="email" placeholder="Your email" required class="ck-field">
-      <input type="tel" name="phone" placeholder="Phone (optional)" class="ck-field">
-      <div class="ck-summary" id="ckSummary" hidden>
-        <dt>Minutes</dt><dd id="ckSumProduct"></dd>
-        <dt>Price</dt><dd id="ckSumPrice"></dd>
+      <div class="ck-progress">
+        <div class="ck-progress-step on" id="ckProg1"><span class="ck-progress-dot">1</span>Choose</div>
+        <div class="ck-progress-line" id="ckLine1"></div>
+        <div class="ck-progress-step" id="ckProg2"><span class="ck-progress-dot">2</span>Your Info</div>
+        <div class="ck-progress-line" id="ckLine2"></div>
+        <div class="ck-progress-step" id="ckProg3"><span class="ck-progress-dot">3</span>Payment</div>
       </div>
-      <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
-      <button class="btn btn-primary" type="submit">Continue to Payment</button>
-      <p id="ckNote" class="ck-note" hidden></p>
-    </form>
-  </div>
 
-  <div class="ck-step ck-locked" id="ckStepPay">
-    <h2><span class="ck-step-num">3</span>Payment</h2>
-    <p style="color:var(--ink-soft);font-size:.85rem;margin:0 0 1rem" id="ckHoldNote"></p>
-    <div style="display:flex;gap:.6rem;max-width:420px;margin-bottom:1rem;align-items:flex-end">
-      <div style="flex:1"><label style="display:block;font-size:.8rem;color:var(--ink-soft);margin-bottom:.3rem">Coupon code (optional)</label><input type="text" id="ckCoupon" style="width:100%;padding:.7rem .9rem;border:1px solid var(--line-strong);border-radius:10px;font-family:var(--font-body);text-transform:uppercase" placeholder="e.g. TEST100"></div>
-      <button class="btn btn-ghost" id="ckApplyCoupon" type="button" style="white-space:nowrap">Apply</button>
-    </div>
-    <p id="ckCouponNote" class="ck-note" hidden style="margin:0 0 1rem"></p>
-    <div style="display:grid;gap:.7rem;max-width:420px">
-      <div><label style="display:block;font-size:.8rem;color:var(--ink-soft);margin-bottom:.3rem">Card number</label><div id="ckCardNumber" class="ck-field" style="min-height:44px"></div></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
-        <div><label style="display:block;font-size:.8rem;color:var(--ink-soft);margin-bottom:.3rem">Expiry</label><div id="ckCardDate" class="ck-field" style="min-height:44px"></div></div>
-        <div><label style="display:block;font-size:.8rem;color:var(--ink-soft);margin-bottom:.3rem">CVV</label><div id="ckCardCvv" class="ck-field" style="min-height:44px"></div></div>
+      <div class="ck-secure">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <div>
+          <strong>Secure, encrypted checkout</strong>
+          <p>Your card number is encrypted the moment you type it and processed directly by Clover, a PCI-compliant payment processor used by businesses worldwide. It never touches Cherry Sage's servers, and no one at Cherry Sage ever sees your full card number.</p>
+          <div class="ck-secure-marks"><span>256-bit encryption</span><span>PCI-DSS compliant</span><span>Processed by Clover</span></div>
+        </div>
       </div>
-      <div><label style="display:block;font-size:.8rem;color:var(--ink-soft);margin-bottom:.3rem">Postal code</label><div id="ckCardPostal" class="ck-field" style="min-height:44px"></div></div>
-    </div>
-    <button class="btn btn-gold" id="ckPayBtn" type="button" style="margin-top:1.2rem">Pay Now</button>
-    <p class="ck-pay-secure"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Encrypted &amp; secured by Clover, a PCI-compliant processor</p>
-    <p id="ckPayNote" class="ck-note" hidden></p>
-  </div>
 
-  <div class="ck-step" id="ckStepDone" hidden>
-    <div class="card reveal" style="text-align:center;border-color:var(--gold)">
-      <p class="eyebrow">You're all set</p>
-      <h2>Payment received</h2>
-      <p class="pull-refl" id="ckDoneText"></p>
-      <p style="color:var(--ink-soft);font-size:.9rem">Call or email Cherry whenever you're ready to use your minutes.</p>
+      <div class="ck-step" id="ckStepProduct">
+        <h2>Choose your minutes</h2>
+        <div class="ck-products" id="ckProducts"><p style="color:var(--ink-soft)">Loading…</p></div>
+      </div>
+
+      <div class="ck-step ck-locked" id="ckStepInfo">
+        <h2>Your information</h2>
+        <form id="ckForm" style="display:grid;gap:.8rem;max-width:420px">
+          <input type="text" name="name" placeholder="Your name" required class="ck-field">
+          <input type="email" name="email" placeholder="Your email" required class="ck-field">
+          <input type="tel" name="phone" placeholder="Phone (optional)" class="ck-field">
+          <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
+          <button class="btn btn-primary" type="submit">Continue to Payment</button>
+          <p id="ckNote" class="ck-note" hidden></p>
+        </form>
+      </div>
+
+      <div class="ck-step ck-locked" id="ckStepPay">
+        <h2>Payment</h2>
+        <div class="ck-pay-panel">
+          <div style="display:flex;gap:.6rem;max-width:420px;margin-bottom:1.2rem;align-items:flex-end">
+            <div style="flex:1"><label style="display:block;font-size:.8rem;color:var(--ink-soft);margin-bottom:.3rem">Coupon code (optional)</label><input type="text" id="ckCoupon" style="width:100%;padding:.7rem .9rem;border:1px solid var(--line-strong);border-radius:10px;font-family:var(--font-body);text-transform:uppercase" placeholder="e.g. TEST100"></div>
+            <button class="btn btn-ghost" id="ckApplyCoupon" type="button" style="white-space:nowrap">Apply</button>
+          </div>
+          <p id="ckCouponNote" class="ck-note" hidden style="margin:0 0 1.2rem"></p>
+          <h3>Card details</h3>
+          <div style="display:grid;gap:.7rem;max-width:420px">
+            <div><label style="display:block;font-size:.8rem;color:var(--ink-soft);margin-bottom:.3rem">Card number</label><div id="ckCardNumber" class="ck-field" style="min-height:44px"></div></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem">
+              <div><label style="display:block;font-size:.8rem;color:var(--ink-soft);margin-bottom:.3rem">Expiry</label><div id="ckCardDate" class="ck-field" style="min-height:44px"></div></div>
+              <div><label style="display:block;font-size:.8rem;color:var(--ink-soft);margin-bottom:.3rem">CVV</label><div id="ckCardCvv" class="ck-field" style="min-height:44px"></div></div>
+            </div>
+            <div><label style="display:block;font-size:.8rem;color:var(--ink-soft);margin-bottom:.3rem">Postal code</label><div id="ckCardPostal" class="ck-field" style="min-height:44px"></div></div>
+          </div>
+          <p class="ck-cards-accepted">We accept Visa, Mastercard, American Express and Discover.</p>
+          <button class="btn btn-gold" id="ckPayBtn" type="button" style="margin-top:1.2rem">Pay Now</button>
+          <p class="ck-pay-secure"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Encrypted &amp; secured by Clover, a PCI-compliant processor</p>
+          <p id="ckPayNote" class="ck-note" hidden></p>
+        </div>
+      </div>
+
+      <div class="ck-step" id="ckStepDone" hidden>
+        <div class="card reveal" style="text-align:center;border-color:var(--gold)">
+          <p class="eyebrow">You're all set</p>
+          <h2>Payment received</h2>
+          <p class="pull-refl" id="ckDoneText"></p>
+          <p style="color:var(--ink-soft);font-size:.9rem">Call or email Cherry whenever you're ready to use your minutes.</p>
+        </div>
+      </div>
+
     </div>
+
+    <aside class="ck-side">
+      <div class="ck-side-card">
+        <p class="ck-side-label">Your order</p>
+        <p class="ck-side-empty" id="ckSideEmpty">Choose your minutes to see your total here.</p>
+        <div class="ck-side-row" id="ckSideRow" hidden>
+          <span id="ckSideName">—</span><span id="ckSidePrice">—</span>
+        </div>
+        <div class="ck-side-total" id="ckSideTotalRow" hidden>
+          <span>Total</span><span id="ckSideTotal">—</span>
+        </div>
+        <p class="ck-side-coupon-tag" id="ckSideCouponTag" hidden></p>
+      </div>
+      <div class="ck-side-trust">
+        <div class="ck-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <p><strong>4.9</strong> out of 5 &middot; 390 real client reviews</p>
+      </div>
+      <p class="ck-side-since">Reading clients by phone since 1999.</p>
+    </aside>
   </div>
 
 </div></section>
@@ -152,6 +234,30 @@
 
   function money(cents){ return '$'+((cents||0)/100).toFixed(2); }
 
+  function setProgress(step){
+    for(var i=1;i<=3;i++){
+      var dot=document.getElementById('ckProg'+i);
+      dot.classList.remove('on','done');
+      if(i<step) dot.classList.add('done');
+      else if(i===step) dot.classList.add('on');
+    }
+    var l1=document.getElementById('ckLine1'), l2=document.getElementById('ckLine2');
+    l1.classList.toggle('done', step>1);
+    l2.classList.toggle('done', step>2);
+  }
+
+  function updateSideOrder(){
+    var empty=document.getElementById('ckSideEmpty'), row=document.getElementById('ckSideRow'), totalRow=document.getElementById('ckSideTotalRow');
+    if(!selectedProduct){ empty.hidden=false; row.hidden=true; totalRow.hidden=true; return; }
+    empty.hidden=true; row.hidden=false; totalRow.hidden=false;
+    document.getElementById('ckSideName').textContent=selectedProduct.name;
+    document.getElementById('ckSidePrice').textContent=money(selectedProduct.priceCents);
+    var total=(typeof currentPriceCents==='number')?currentPriceCents:selectedProduct.priceCents;
+    document.getElementById('ckSideTotal').textContent=money(total);
+    var tag=document.getElementById('ckSideCouponTag');
+    if(appliedCoupon){ tag.hidden=false; tag.textContent='Coupon "'+appliedCoupon+'" applied'; } else { tag.hidden=true; }
+  }
+
   var preselectAmt=new URLSearchParams(location.search).get('amt');
 
   fetch(SUPABASE_URL+'/rest/v1/reading_products?select=id,name,duration_minutes,price_cents&requires_scheduling=eq.false&duration_minutes=not.is.null&active=eq.true&order=price_cents.asc', {
@@ -159,9 +265,13 @@
   }).then(function(r){return r.json();}).then(function(products){
     if(!products||!products.length){ productsBox.innerHTML='<p style="color:var(--cherry)">No minute packages available right now, please try again shortly.</p>'; return; }
     productsBox.innerHTML=products.map(function(p){
-      return '<button type="button" class="ck-product" data-id="'+p.id+'" data-name="'+p.name.replace(/"/g,'&quot;')+'" data-price="'+p.price_cents+'">'+
-        '<span><span class="ck-product-name">'+p.name+'</span></span>'+
-        '<span class="ck-product-price">'+money(p.price_cents)+'</span></button>';
+      var isFirst=/first time/i.test(p.name);
+      return '<button type="button" class="ck-pcard" data-id="'+p.id+'" data-name="'+p.name.replace(/"/g,'&quot;')+'" data-price="'+p.price_cents+'">'+
+        '<span class="ck-pcard-check">&#10003;</span>'+
+        (isFirst?'<span class="ck-pcard-first">First time</span>':'')+
+        '<span class="ck-pcard-dur">'+p.duration_minutes+'<small>min</small></span>'+
+        '<span class="ck-pcard-name">'+p.name+'</span>'+
+        '<span class="ck-pcard-price">'+money(p.price_cents)+'</span></button>';
     }).join('');
     if(preselectAmt){
       var match=products.find(function(p){ return String(p.price_cents)===preselectAmt; });
@@ -176,21 +286,15 @@
   }).catch(function(){ productsBox.innerHTML='<p style="color:var(--cherry)">Could not load minute packages, please refresh the page.</p>'; });
 
   productsBox.addEventListener('click',function(e){
-    var btn=e.target.closest('.ck-product'); if(!btn) return;
-    productsBox.querySelectorAll('.ck-product').forEach(function(b){b.classList.remove('on');});
+    var btn=e.target.closest('.ck-pcard'); if(!btn) return;
+    productsBox.querySelectorAll('.ck-pcard').forEach(function(b){b.classList.remove('on');});
     btn.classList.add('on');
     selectedProduct={id:btn.getAttribute('data-id'), name:btn.getAttribute('data-name'), priceCents:parseInt(btn.getAttribute('data-price'),10)};
     stepInfo.classList.remove('ck-locked');
-    updateSummary();
+    currentPriceCents=selectedProduct.priceCents;
+    setProgress(2);
+    updateSideOrder();
   });
-
-  function updateSummary(){
-    if(selectedProduct){
-      summary.hidden=false;
-      document.getElementById('ckSumProduct').textContent=selectedProduct.name;
-      document.getElementById('ckSumPrice').textContent=money(selectedProduct.priceCents);
-    } else { summary.hidden=true; }
-  }
 
   var currentCustomer=null, appliedCoupon=null, currentPriceCents=null;
 
@@ -217,7 +321,8 @@
       stepInfo.hidden=true;
       var payStep=document.getElementById('ckStepPay');
       payStep.classList.remove('ck-locked'); payStep.hidden=false;
-      document.getElementById('ckHoldNote').textContent=selectedProduct.name+', '+money(currentPriceCents)+'.';
+      setProgress(3);
+      updateSideOrder();
       initCloverFields();
       payStep.scrollIntoView({behavior:'smooth',block:'center'});
     }).catch(function(){
@@ -248,7 +353,7 @@
         appliedCoupon=code; currentPriceCents=row.final_price_cents;
         couponNote.textContent='Coupon applied — new total '+money(currentPriceCents)+'.';
       }
-      document.getElementById('ckHoldNote').textContent=selectedProduct.name+', '+money(currentPriceCents)+'.';
+      updateSideOrder();
     }).catch(function(){
       couponNote.textContent='Could not check that code, please try again.';
     });
