@@ -34,6 +34,14 @@
 .ck-summary dd{margin:.1rem 0 0;font-weight:600;color:var(--ink)}
 .ck-note{font-size:.85rem;color:var(--cherry);margin-top:.6rem}
 .ck-locked{opacity:.4;pointer-events:none}
+.ck-secure{display:flex;gap:.9rem;align-items:flex-start;background:var(--paper-2);border:1px solid var(--line);border-radius:12px;padding:1rem 1.2rem;margin-bottom:1.8rem}
+.ck-secure svg{flex-shrink:0;width:24px;height:24px;color:var(--oxblood);margin-top:.15rem}
+.ck-secure strong{display:block;color:var(--oxblood);font-size:.92rem;margin-bottom:.25rem}
+.ck-secure p{margin:0;font-size:.82rem;color:var(--ink-soft);line-height:1.55}
+.ck-secure-marks{display:flex;gap:.6rem;margin-top:.55rem;flex-wrap:wrap}
+.ck-secure-marks span{font-size:.7rem;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);border:1px solid var(--line-strong);border-radius:6px;padding:.25rem .55rem;white-space:nowrap}
+.ck-pay-secure{display:flex;align-items:center;gap:.4rem;font-size:.78rem;color:var(--ink-soft);margin-top:.7rem}
+.ck-pay-secure svg{width:15px;height:15px;color:var(--oxblood);flex-shrink:0}
 </style>
 </head>
 <body>
@@ -50,6 +58,15 @@
 <main>
 <section class="page-hero banner"><div class="ph-glow" aria-hidden="true"></div><div class="ph-stars" aria-hidden="true"></div><div class="wrap reveal"><p class="eyebrow">Shop &middot; Buy Minutes</p><h1>Buy Minutes</h1><p class="lede">Pay now, then call or email Cherry whenever you're ready. No appointment needed for this one.</p></div></section>
 <section class="section"><div class="wrap ck-wrap">
+
+  <div class="ck-secure">
+    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    <div>
+      <strong>Secure, encrypted checkout</strong>
+      <p>Your card number is encrypted the moment you type it and processed directly by Clover, a PCI-compliant payment processor used by businesses worldwide. It never touches Cherry Sage's servers, and no one at Cherry Sage ever sees your full card number.</p>
+      <div class="ck-secure-marks"><span>256-bit encryption</span><span>PCI-DSS compliant</span><span>Processed by Clover</span></div>
+    </div>
+  </div>
 
   <div class="ck-step" id="ckStepProduct">
     <h2><span class="ck-step-num">1</span>Choose your minutes</h2>
@@ -89,6 +106,7 @@
       <div><label style="display:block;font-size:.8rem;color:var(--ink-soft);margin-bottom:.3rem">Postal code</label><div id="ckCardPostal" class="ck-field" style="min-height:44px"></div></div>
     </div>
     <button class="btn btn-gold" id="ckPayBtn" type="button" style="margin-top:1.2rem">Pay Now</button>
+    <p class="ck-pay-secure"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Encrypted &amp; secured by Clover, a PCI-compliant processor</p>
     <p id="ckPayNote" class="ck-note" hidden></p>
   </div>
 
@@ -134,6 +152,8 @@
 
   function money(cents){ return '$'+((cents||0)/100).toFixed(2); }
 
+  var preselectAmt=new URLSearchParams(location.search).get('amt');
+
   fetch(SUPABASE_URL+'/rest/v1/reading_products?select=id,name,duration_minutes,price_cents&requires_scheduling=eq.false&duration_minutes=not.is.null&active=eq.true&order=price_cents.asc', {
     headers:{apikey:SUPABASE_ANON, 'Accept-Profile':'cherry_sage'}
   }).then(function(r){return r.json();}).then(function(products){
@@ -143,6 +163,16 @@
         '<span><span class="ck-product-name">'+p.name+'</span></span>'+
         '<span class="ck-product-price">'+money(p.price_cents)+'</span></button>';
     }).join('');
+    if(preselectAmt){
+      var match=products.find(function(p){ return String(p.price_cents)===preselectAmt; });
+      if(match){
+        var btn=productsBox.querySelector('[data-id="'+match.id+'"]');
+        if(btn){
+          btn.click();
+          setTimeout(function(){ stepInfo.scrollIntoView({behavior:'smooth',block:'start'}); },150);
+        }
+      }
+    }
   }).catch(function(){ productsBox.innerHTML='<p style="color:var(--cherry)">Could not load minute packages, please refresh the page.</p>'; });
 
   productsBox.addEventListener('click',function(e){

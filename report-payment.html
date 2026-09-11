@@ -17,6 +17,14 @@
 .ck-wrap{max-width:520px;margin:0 auto}
 .ck-field{padding:.8rem 1rem;border:1px solid var(--line-strong);border-radius:12px;font-family:var(--font-body);width:100%}
 .ck-note{font-size:.85rem;color:var(--cherry);margin-top:.6rem}
+.ck-secure{display:flex;gap:.9rem;align-items:flex-start;background:var(--paper-2);border:1px solid var(--line);border-radius:12px;padding:1rem 1.2rem;margin-bottom:1.8rem}
+.ck-secure svg{flex-shrink:0;width:24px;height:24px;color:var(--oxblood);margin-top:.15rem}
+.ck-secure strong{display:block;color:var(--oxblood);font-size:.92rem;margin-bottom:.25rem}
+.ck-secure p{margin:0;font-size:.82rem;color:var(--ink-soft);line-height:1.55}
+.ck-secure-marks{display:flex;gap:.6rem;margin-top:.55rem;flex-wrap:wrap}
+.ck-secure-marks span{font-size:.7rem;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-soft);border:1px solid var(--line-strong);border-radius:6px;padding:.25rem .55rem;white-space:nowrap}
+.ck-pay-secure{display:flex;align-items:center;gap:.4rem;font-size:.78rem;color:var(--ink-soft);margin-top:.7rem}
+.ck-pay-secure svg{width:15px;height:15px;color:var(--oxblood);flex-shrink:0}
 </style>
 </head>
 <body>
@@ -37,6 +45,14 @@
   <div id="rpMissing" hidden><p style="color:var(--cherry)">We couldn't find your order details. Please go back and fill out the report form again.</p><a class="btn btn-primary" href="/shop">Back to Shop</a></div>
 
   <div id="rpPay">
+    <div class="ck-secure">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      <div>
+        <strong>Secure, encrypted checkout</strong>
+        <p>Your card number is encrypted the moment you type it and processed directly by Clover, a PCI-compliant payment processor used by businesses worldwide. It never touches Cherry Sage's servers, and no one at Cherry Sage ever sees your full card number.</p>
+        <div class="ck-secure-marks"><span>256-bit encryption</span><span>PCI-DSS compliant</span><span>Processed by Clover</span></div>
+      </div>
+    </div>
     <div style="display:flex;gap:.6rem;max-width:420px;margin-bottom:1rem;align-items:flex-end">
       <div style="flex:1"><label style="display:block;font-size:.8rem;color:var(--ink-soft);margin-bottom:.3rem">Coupon code (optional)</label><input type="text" id="ckCoupon" style="width:100%;padding:.7rem .9rem;border:1px solid var(--line-strong);border-radius:10px;font-family:var(--font-body);text-transform:uppercase" placeholder="e.g. TEST100"></div>
       <button class="btn btn-ghost" id="ckApplyCoupon" type="button" style="white-space:nowrap">Apply</button>
@@ -51,6 +67,7 @@
       <div><label style="display:block;font-size:.8rem;color:var(--ink-soft);margin-bottom:.3rem">Postal code</label><div id="ckCardPostal" class="ck-field" style="min-height:44px"></div></div>
     </div>
     <button class="btn btn-gold" id="ckPayBtn" type="button" style="margin-top:1.2rem">Pay Now</button>
+    <p class="ck-pay-secure"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 11V7a4 4 0 0 1 8 0v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Encrypted &amp; secured by Clover, a PCI-compliant processor</p>
     <p id="ckPayNote" class="ck-note" hidden></p>
   </div>
 
