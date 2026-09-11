@@ -91,3 +91,51 @@
   window.addEventListener('load',scaleHeaders);
   if(document.readyState!=='loading') scaleHeaders(); else document.addEventListener('DOMContentLoaded',scaleHeaders);
 })();
+
+/* 2026-09-11: shared multi-item cart (localStorage) + floating cart widget.
+   Lives here (app.js, already loaded sitewide) instead of a new <script> tag so adding a real
+   cart didn't require touching the nav/footer chrome on 180+ static pages. Any page can call
+   window.CSCart.add({...}) to add an item; the widget below renders itself automatically. */
+window.CSCart = (function(){
+  var KEY = 'cs_cart';
+  function read(){ try{ return JSON.parse(localStorage.getItem(KEY)||'[]'); }catch(e){ return []; } }
+  function write(items){ try{ localStorage.setItem(KEY, JSON.stringify(items)); }catch(e){} renderWidget(); }
+  function add(item){
+    var items = read();
+    items.push({
+      readingProductId: item.readingProductId, name: item.name, priceCents: item.priceCents,
+      details: item.details || null, lineId: 'l'+Date.now()+Math.random().toString(36).slice(2,7)
+    });
+    write(items);
+    return items;
+  }
+  function remove(lineId){ write(read().filter(function(it){ return it.lineId!==lineId; })); }
+  function clear(){ write([]); }
+  function get(){ return read(); }
+  function count(){ return read().length; }
+  function total(){ return read().reduce(function(s,it){ return s+(it.priceCents||0); },0); }
+
+  function renderWidget(){
+    var items = read();
+    var el = document.getElementById('csCartWidget');
+    if(!items.length){ if(el) el.remove(); return; }
+    if(!el){
+      el = document.createElement('a');
+      el.id = 'csCartWidget';
+      el.href = '/cart.html';
+      el.style.cssText = 'position:fixed;left:20px;bottom:20px;z-index:900;display:flex;align-items:center;gap:.5rem;'+
+        'background:#6E1A28;color:#FFFDF8;font-family:Lora,Georgia,serif;font-size:.85rem;font-weight:600;'+
+        'padding:.7rem 1.1rem;border-radius:999px;box-shadow:0 8px 26px -12px rgba(74,15,25,.5);text-decoration:none;'+
+        'transition:transform .15s ease';
+      el.onmouseenter=function(){ el.style.transform='translateY(-2px)'; };
+      el.onmouseleave=function(){ el.style.transform='none'; };
+      document.body.appendChild(el);
+    }
+    var money = '$'+(total()/100).toFixed(2);
+    el.innerHTML = '<span aria-hidden="true">&#128715;</span> Cart ('+items.length+') &middot; '+money;
+  }
+
+  if(document.readyState!=='loading') renderWidget(); else document.addEventListener('DOMContentLoaded', renderWidget);
+
+  return { add: add, remove: remove, clear: clear, get: get, count: count, total: total };
+})();

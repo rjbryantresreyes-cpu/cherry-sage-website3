@@ -58,11 +58,17 @@ export default async (req) => {
   const date = new Date(dateStr + "T00:00:00Z");
   const dayOfWeek = date.getUTCDay();
 
-  const { data: settings } = await supabase
-    .from("scheduling_settings")
-    .select("*")
-    .eq("id", 1)
-    .maybeSingle();
+  // These two lookups do not depend on each other, so they run together rather than one
+  // after the other. Measured 2026-09-12: the client reported the booking page as
+  // "extremely slow" and picking a date cost 2.3s warm / 4.2s cold. Each sequential round
+  // trip to Supabase was adding to that for no reason.
+  const [settingsRes, overrideRes] = await Promise.all([
+    supabase.from("scheduling_settings").select("*").eq("id", 1).maybeSingle(),
+    supabase.from("availability_overrides").select("*").eq("date", dateStr).maybeSingle(),
+  ]);
+  const settings = settingsRes?.data;
+  const override = overrideRes?.data;
+
   const earliestMinutes = settings?.earliest_booking_minutes_from_now ?? 60;
   const maxAdvanceDays = settings?.max_advance_booking_days ?? 30;
 
@@ -70,12 +76,6 @@ export default async (req) => {
   if (requestedDaysOut > maxAdvanceDays) {
     return json({ slots: [], reason: "too far in advance" });
   }
-
-  const { data: override } = await supabase
-    .from("availability_overrides")
-    .select("*")
-    .eq("date", dateStr)
-    .maybeSingle();
 
   let startTime, endTime;
   if (override) {

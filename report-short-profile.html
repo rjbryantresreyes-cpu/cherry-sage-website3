@@ -54,7 +54,7 @@
       <input type="date" name="dob" required aria-label="Date of birth" style="padding:.85rem 1rem;border:1px solid var(--line-strong);border-radius:12px;font-family:var(--font-body)">
       <input type="email" name="email" placeholder="Your email (your report is sent here)" required style="padding:.85rem 1rem;border:1px solid var(--line-strong);border-radius:12px;font-family:var(--font-body)">
       <input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
-      <button class="btn btn-primary" type="submit">Save my details &amp; continue to payment</button>
+      <button class="btn btn-primary" type="submit">Add to Cart</button>
       <p id="rfNote" style="margin:0;color:var(--cherry);font-size:.9rem" hidden></p>
     </form>
   </div>
@@ -67,16 +67,10 @@
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){note.hidden=false;note.textContent='Please enter a valid email.';return;}
     if(!(f.fullname.value||'').trim()||!f.dob.value){note.hidden=false;note.textContent='Please add your full birth name and date of birth.';return;}
     if(f.website.value){ return; }
-    note.hidden=true; btn.disabled=true;btn.textContent='Saving...';
-    var details={fullname:f.fullname.value.trim(), dob:f.dob.value};
-    fetch('/.netlify/functions/purchase-start',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({name:f.fullname.value.trim(),email:email,readingProductId:'c18ae7f5-e570-49fb-8214-814a3fc0beb7'})})
-    .then(function(r){return r.json().then(function(d){return {ok:r.ok,data:d};});})
-    .then(function(res){
-      if(!res.ok||!res.data.ok){ note.hidden=false; note.textContent='Something went wrong, please try again.'; btn.disabled=false; btn.textContent='Save my details \u0026 continue to payment'; return; }
-      try{ sessionStorage.setItem('cs_report_details', JSON.stringify(details)); }catch(e){}
-      location.href='/report-payment.html?customer='+encodeURIComponent(res.data.customerId)+'&product=c18ae7f5-e570-49fb-8214-814a3fc0beb7';
-    }).catch(function(){ note.hidden=false; note.textContent='Something went wrong, please try again.'; btn.disabled=false; btn.textContent='Save my details \u0026 continue to payment'; });
+    note.hidden=true; btn.disabled=true;btn.textContent='Adding...';
+    var details={fullname:f.fullname.value.trim(), dob:f.dob.value, email:email};
+    window.CSCart.add({readingProductId:'c18ae7f5-e570-49fb-8214-814a3fc0beb7', name:'Short Profile', priceCents:1800, details:details});
+    location.href='/cart.html'; return;
   });})();
 </script><section class="section section-dark cta" id="book"><div class="wrap reveal"><h2>Ready for clarity?</h2><p>Your first step is a quiet one. Book your reading and let the answers you're seeking find their way to you.</p><a class="btn btn-gold" href="/shop">Book a Reading</a></div></section>
 </main>
@@ -98,7 +92,7 @@
   <span class="cw-status"><span class="status-dot"></span>Cherry is Online</span>
   <span class="cw-bubble"><img src="assets/mark-clean.png" alt=""></span>
 </div>
-<script src="app.js?v=8"></script>
+<script src="app.js?v=9"></script>
 <script src="embers.js?v=4"></script>
 <script src="magic.js?v=2"></script>
 <script src="funnel.js?v=8"></script>
