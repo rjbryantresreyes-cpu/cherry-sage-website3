@@ -109,15 +109,14 @@ export default async (req) => {
     slots.push(new Date(t));
   }
 
-  const results = await Promise.all(
-    slots.map(async (slot) => {
-      const { data: available } = await supabase.rpc("is_slot_available", {
-        p_start: slot.toISOString(),
-        p_duration_minutes: duration,
-      });
-      return available ? slot.toISOString() : null;
-    })
-  );
+  // One round trip for the whole day's candidate slots instead of one RPC call per slot
+  // (that per-slot loop was the real cause of the "extremely slow" complaint, 2026-09-12).
+  if (!slots.length) return json({ slots: [] });
+  const { data: available, error: availErr } = await supabase.rpc("available_slots_batch", {
+    p_starts: slots.map((s) => s.toISOString()),
+    p_duration_minutes: duration,
+  });
+  if (availErr) return json({ slots: [], error: availErr.message }, 500);
 
-  return json({ slots: results.filter(Boolean) });
+  return json({ slots: (available || []).sort() });
 };
