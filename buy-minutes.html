@@ -17,7 +17,12 @@
 <style>
 .ck-layout{display:grid;grid-template-columns:1.55fr 1fr;gap:clamp(1.6rem,4vw,2.8rem);align-items:start;grid-template-areas:"main side"}
 .ck-main{grid-area:main;min-width:0}
-.ck-side{grid-area:side;display:flex;flex-direction:column;gap:1.1rem;position:sticky;top:6.5rem}
+.ck-side-rail{grid-area:side;align-self:stretch;border-left:1px solid var(--line);padding-left:clamp(1.3rem,3vw,2rem)}
+.ck-side{display:flex;flex-direction:column;gap:1.1rem;position:sticky;top:6.5rem}
+.ck-side-about{display:flex;gap:.9rem;align-items:center;background:var(--cream);border:1px solid var(--line);border-radius:var(--r-lg);padding:1.1rem 1.3rem;box-shadow:var(--shadow-sm)}
+.ck-side-photo{width:58px;height:58px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid var(--gold-soft)}
+.ck-side-about p{margin:0;font-size:.8rem;color:var(--ink-soft);line-height:1.5}
+.ck-side-about strong{display:block;color:var(--oxblood);font-family:var(--font-display);font-size:1rem;margin-bottom:.15rem}
 
 /* progress bar */
 .ck-progress{display:flex;align-items:center;margin-bottom:2.2rem}
@@ -90,6 +95,7 @@
 
 @media (max-width:860px){
   .ck-layout{grid-template-columns:1fr;grid-template-areas:"side" "main"}
+  .ck-side-rail{border-left:0;padding-left:0}
   .ck-side{position:static;flex-direction:column-reverse}
 }
 </style>
@@ -181,6 +187,7 @@
 
     </div>
 
+    <div class="ck-side-rail">
     <aside class="ck-side">
       <div class="ck-side-card">
         <p class="ck-side-label">Your order</p>
@@ -197,8 +204,12 @@
         <div class="ck-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
         <p><strong>4.9</strong> out of 5 &middot; 390 real client reviews</p>
       </div>
-      <p class="ck-side-since">Reading clients by phone since 1999.</p>
+      <div class="ck-side-about">
+        <img src="assets/bev_portrait.jpg" alt="Cherry Sage" class="ck-side-photo" loading="lazy">
+        <p><strong>Cherry Sage</strong>Honest, accurate psychic, tarot, and numerology readings by phone. Trusted since 1999.</p>
+      </div>
     </aside>
+    </div>
   </div>
 
 </div></section>
