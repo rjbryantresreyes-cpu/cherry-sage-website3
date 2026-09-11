@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign In — Cherry Sage</title>
+<meta name="description" content="Sign in to your Cherry Sage account to see your order and appointment history.">
+<link rel="canonical" href="https://cherrysage.com/login.html">
+<meta name="robots" content="noindex,follow">
+<meta name="theme-color" content="#6E1A28">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500;1,600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site.css?v=45">
+<link rel="icon" href="assets/favicon.ico?v=2" sizes="any">
+<link rel="icon" href="assets/icon-32.png?v=2" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="assets/icon-180.png?v=2">
+<style>
+.lg-wrap{max-width:420px;margin:0 auto;text-align:center}
+.lg-field{padding:.85rem 1rem;border:1px solid var(--line-strong);border-radius:12px;font-family:var(--font-body);width:100%;box-sizing:border-box}
+.lg-note{font-size:.88rem;color:var(--ink-soft);margin-top:1rem}
+.lg-error{font-size:.85rem;color:var(--cherry);margin-top:.8rem}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap nav-row">
+    <a aria-label='Cherry Sage home' class='brand' href='/'><img src="assets/logo-horizontal.png" alt="Cherry Sage — Psychic, Tarot, Numerology"></a>
+    <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false">&#9776;</button>
+    <nav class="primary-nav" id="primaryNav" aria-label="Primary">
+      <ul><li><a href="/meet">Meet Cherry</a></li><li class="has-dropdown"><a href="/psychic-reading">Readings</a><ul class="dropdown"><li><a href="/psychic-reading">Psychic Reading</a></li><li><a href="/tarot">Tarot Card Reading</a></li><li><a href="/book-appointment">Request a Time</a></li></ul></li><li class="has-dropdown"><a href="/numerology">Numerology</a><ul class="dropdown"><li><a href="/free-karmic-reading">Free Numerology Reading</a></li></ul></li><li class="has-dropdown"><a href="/testimonials">Reviews</a><ul class="dropdown"><li><a href="/feedback">Leave Feedback</a></li></ul></li><li class="has-dropdown"><a href="/blog">Blog</a><ul class="dropdown"><li><a href="/articles">Guest Articles</a></li></ul></li><li class="has-dropdown"><a href="/tarot-pull">Free Tools</a><ul class="dropdown"><li><a href="/tarot-pull">Free Tarot Pull</a></li><li><a href="/tarot-spread">Free Tarot Spread</a></li><li><a href="/life-path">Life Path Calculator</a></li><li><a href="/horoscope">Daily Horoscope</a></li></ul></li><li><a href="/shop">Shop</a></li><li><a href="/contact">Contact</a></li><li><a href="/account" class="nav-utility">My Account</a></li></ul>
+      <a class='btn btn-primary' href='/shop'>Book a Reading</a>
+    </nav>
+  </div>
+</header>
+<main>
+<section class="page-hero banner"><div class="ph-glow" aria-hidden="true"></div><div class="ph-stars" aria-hidden="true"></div><div class="wrap reveal"><p class="eyebrow">My Account</p><h1>Sign In</h1><p class="lede">No password to remember. We'll email you a one-time link.</p></div></section>
+<section class="section"><div class="wrap lg-wrap">
+  <div class="card reveal" id="lgFormCard">
+    <form id="lgForm" style="display:grid;gap:.9rem">
+      <input type="email" name="email" placeholder="Your email" required class="lg-field">
+      <button class="btn btn-primary" type="submit">Send me a login link</button>
+      <p id="lgError" class="lg-error" hidden></p>
+    </form>
+  </div>
+  <div class="card reveal" id="lgSentCard" hidden style="text-align:center">
+    <h3 style="margin:0 0 .5rem">Check your email</h3>
+    <p style="color:var(--ink-soft);margin:0" id="lgSentText"></p>
+  </div>
+  <p class="lg-note">This link signs you into cherrysage.com only, on this device. It's the same email address you used to book or buy.</p>
+</div></section>
+</main>
+<footer class="footer">
+  <div class="wrap footer-grid">
+    <div>
+      <div class="footer-brand"><img src="assets/mark-clean.png" alt=""><span>Cherry Sage</span></div>
+      <p style="font-size:.9rem">Honest, accurate psychic, tarot, and numerology readings by phone. Trusted since 1999.</p>
+    </div>
+    <div><h4>Readings</h4><ul><li><a href="/psychic-reading">Psychic Reading</a></li><li><a href="/tarot">Tarot Card Reading</a></li><li><a href="/numerology">Numerology</a></li><li><a href="/how-it-works">How It Works</a></li></ul></div>
+    <div><h4>Explore</h4><ul><li><a href="/meet">Meet Cherry</a></li><li><a href="/blog">Blog</a></li><li><a href="/articles">Guest Articles</a></li><li><a href="/testimonials">Testimonials</a></li><li><a href="/policies">Policies</a></li></ul></div>
+    <div><h4>Free</h4><ul><li><a href="/tarot-pull">Free Tarot Pull</a></li><li><a href="/tarot-spread">Free Tarot Spread</a></li><li><a href="/life-path">Life Path Calculator</a></li><li><a href="/free-karmic-reading">Karmic Accumulation</a></li><li><a href="/horoscope">Daily Horoscope</a></li><li><a href="/feedback">Leave Feedback</a></li></ul></div>
+  </div>
+  <div class="wrap footer-bottom">© Cherry Sage. Serving clients worldwide since 1999. · Site by Balay ni Bruno &amp; Co.</div>
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="app.js?v=9"></script>
+<script>
+(function(){
+  var SUPABASE_URL='https://ctoeuikxoqlhnebgsygp.supabase.co';
+  var SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0b2V1aWt4b3FsaG5lYmdzeWdwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0ODM4NTMsImV4cCI6MjA5NjA1OTg1M30.Cy0uf8hm-Biea7a1V3bLQBz70f1oyhP83vHDjefTce8';
+  var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON, {db:{schema:'cherry_sage'}});
+
+  sb.auth.getSession().then(function(res){
+    if(res.data && res.data.session){ location.href='/account.html'; }
+  });
+
+  var f=document.getElementById('lgForm');
+  f.addEventListener('submit', function(e){
+    e.preventDefault();
+    var err=document.getElementById('lgError'), btn=f.querySelector('button[type=submit]');
+    var email=(f.email.value||'').trim();
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ err.hidden=false; err.textContent='Please enter a valid email address.'; return; }
+    err.hidden=true; btn.disabled=true; btn.textContent='Sending…';
+    sb.auth.signInWithOtp({ email: email, options: { emailRedirectTo: 'https://cherrysage.com/account.html' } })
+      .then(function(res){
+        btn.disabled=false; btn.textContent='Send me a login link';
+        if(res.error){ err.hidden=false; err.textContent=res.error.message||'Could not send the link, please try again.'; return; }
+        document.getElementById('lgFormCard').hidden=true;
+        document.getElementById('lgSentCard').hidden=false;
+        document.getElementById('lgSentText').textContent='We sent a sign-in link to '+email+'. Open it on this device to sign in.';
+      });
+  });
+})();
+</script>
+</body>
+</html>

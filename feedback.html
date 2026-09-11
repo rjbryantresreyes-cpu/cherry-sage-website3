@@ -65,11 +65,26 @@
     var email=(f.email.value||'').trim();
     if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){note.hidden=false;note.textContent='Please enter a valid email.';return;}
     if(!(f.message.value||'').trim()){note.hidden=false;note.textContent='Please share a few words.';return;}
-    btn.disabled=true;btn.textContent='Sending...';
-    fetch('/.netlify/functions/lead',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({email:email,name:f.name.value.trim(),message:'['+rv.value+' stars] '+f.message.value.trim(),source:'feedback',website:f.website.value,t:t0})})
-    .then(function(r){return r.ok;}).catch(function(){return false;})
-    .then(function(){ f.innerHTML='<p style="margin:0;color:var(--oxblood);font-weight:600;font-size:1.1rem">Thank you for sharing. Cherry reads every message herself, and once she approves it, your words will appear on the testimonials page.</p>'; });
+    note.hidden=true; btn.disabled=true;btn.textContent='Checking...';
+    var SUPABASE_URL='https://ctoeuikxoqlhnebgsygp.supabase.co';
+    var SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0b2V1aWt4b3FsaG5lYmdzeWdwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0ODM4NTMsImV4cCI6MjA5NjA1OTg1M30.Cy0uf8hm-Biea7a1V3bLQBz70f1oyhP83vHDjefTce8';
+    fetch(SUPABASE_URL+'/rest/v1/rpc/email_has_history',{method:'POST',headers:{apikey:SUPABASE_ANON,'Content-Type':'application/json','Content-Profile':'cherry_sage'},body:JSON.stringify({p_email:email})})
+    .then(function(r){return r.json();})
+    .then(function(hasHistory){
+      if(!hasHistory){
+        note.hidden=false; btn.disabled=false; btn.textContent='Send my feedback';
+        note.textContent='Feedback is open to Cherry\'s actual clients. We could not find a booking or purchase on file for this email. If you\'ve worked with Cherry before, use the exact email from that order, or sign in.';
+        return;
+      }
+      btn.textContent='Sending...';
+      fetch('/.netlify/functions/lead',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({email:email,name:f.name.value.trim(),message:'['+rv.value+' stars] '+f.message.value.trim(),source:'feedback',website:f.website.value,t:t0})})
+      .then(function(r){return r.ok;}).catch(function(){return false;})
+      .then(function(){ f.innerHTML='<p style="margin:0;color:var(--oxblood);font-weight:600;font-size:1.1rem">Thank you for sharing. Cherry reads every message herself, and once she approves it, your words will appear on the testimonials page.</p>'; });
+    }).catch(function(){
+      note.hidden=false; btn.disabled=false; btn.textContent='Send my feedback';
+      note.textContent='Something went wrong checking your account, please try again.';
+    });
   });})();
 </script><section class="section section-dark cta" id="book"><div class="wrap reveal"><h2>Ready for clarity?</h2><p>Your first step is a quiet one. Book your reading and let the answers you're seeking find their way to you.</p><a class='btn btn-gold' href='/shop'>Book a Reading</a></div></section>
 </main>

@@ -4,19 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>My Account — Cherry Sage</title>
-<meta name="description" content="No account needed at Cherry Sage. Book or buy directly, confirmation comes straight to your email.">
+<meta name="description" content="Sign in to see your order and appointment history with Cherry Sage.">
 <link rel="canonical" href="https://cherrysage.com/account.html">
-<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1">
+<meta name="robots" content="noindex,follow">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Cherry Sage">
 <meta property="og:title" content="My Account — Cherry Sage">
-<meta property="og:description" content="No account needed at Cherry Sage. Book or buy directly, confirmation comes straight to your email.">
+<meta property="og:description" content="Sign in to see your order and appointment history with Cherry Sage.">
 <meta property="og:url" content="https://cherrysage.com/account.html">
-<meta property="og:image" content="https://cherrysage.com/assets/bev_portrait.jpg">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="My Account — Cherry Sage">
-<meta name="twitter:description" content="No account needed at Cherry Sage. Book or buy directly, confirmation comes straight to your email.">
-<meta name="twitter:image" content="https://cherrysage.com/assets/bev_portrait.jpg">
 <meta name="theme-color" content="#6E1A28">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500;1,600&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
@@ -24,8 +19,23 @@
 <link rel="icon" href="assets/favicon.ico?v=2" sizes="any">
 <link rel="icon" href="assets/icon-32.png?v=2" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="assets/icon-180.png?v=2">
-<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": ["ProfessionalService", "Organization"], "@id": "https://cherrysage.com/#org", "name": "Cherry Sage", "url": "https://cherrysage.com/", "description": "Honest, accurate psychic, tarot, and numerology readings by phone since 1999.", "logo": "https://cherrysage.com/assets/logo.png", "image": "https://cherrysage.com/assets/bev_portrait.jpg", "founder": {"@type": "Person", "name": "Cherry Sage"}, "foundingDate": "1999", "areaServed": "Worldwide", "priceRange": "$$", "sameAs": ["https://cherrysage.com"], "aggregateRating": {"@type": "AggregateRating", "ratingValue": "4.9", "reviewCount": "390", "bestRating": "5"}}, {"@type": "WebSite", "@id": "https://cherrysage.com/#website", "url": "https://cherrysage.com/", "name": "Cherry Sage", "publisher": {"@id": "https://cherrysage.com/#org"}, "potentialAction": {"@type": "SearchAction", "target": "https://cherrysage.com/blog.html?q={search_term_string}", "query-input": "required name=search_term_string"}}]}</script>
-
+<style>
+.ac-wrap{max-width:760px;margin:0 auto}
+.ac-header{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:1.6rem;flex-wrap:wrap}
+.ac-list{display:flex;flex-direction:column;gap:.7rem;margin-bottom:2rem}
+.ac-row{display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:1rem 1.2rem;
+  border:1px solid var(--line-strong);border-radius:var(--r);background:var(--cream)}
+.ac-row-name{font-weight:600;color:var(--oxblood)}
+.ac-row-sub{font-size:.8rem;color:var(--ink-soft);margin-top:.15rem}
+.ac-row-price{font-family:var(--font-display);font-weight:600;color:var(--ink);white-space:nowrap}
+.ac-pill{display:inline-block;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
+  padding:.2rem .55rem;border-radius:999px;margin-left:.5rem}
+.ac-pill.paid{background:rgba(126,144,104,.16);color:var(--sage)}
+.ac-pill.pending_approval{background:rgba(192,151,47,.16);color:var(--gold)}
+.ac-pill.approved{background:rgba(126,144,104,.16);color:var(--sage)}
+.ac-pill.declined{background:rgba(160,20,43,.12);color:var(--cherry)}
+.ac-empty{color:var(--ink-soft);font-size:.9rem;padding:1rem 0}
+</style>
 </head>
 <body>
 <header class="site-header">
@@ -33,19 +43,40 @@
     <a class="brand" href="/" aria-label="Cherry Sage home"><img src="assets/logo-horizontal.png" alt="Cherry Sage — Psychic, Tarot, Numerology"></a>
     <button class="nav-toggle" id="navToggle" aria-label="Menu" aria-expanded="false">&#9776;</button>
     <nav class="primary-nav" id="primaryNav" aria-label="Primary">
-      <ul><li><a href="/meet">Meet Cherry</a></li><li class="has-dropdown"><a href="/psychic-reading">Readings</a><ul class="dropdown"><li><a href="/psychic-reading">Psychic Reading</a></li><li><a href="/tarot">Tarot Card Reading</a></li><li><a href="/book-appointment">Request a Time</a></li></ul></li><li class="has-dropdown"><a href="/numerology">Numerology</a><ul class="dropdown"><li><a href="/free-karmic-reading">Free Numerology Reading</a></li></ul></li><li class="has-dropdown"><a href="/testimonials">Reviews</a><ul class="dropdown"><li><a href="/feedback">Leave Feedback</a></li></ul></li><li class="has-dropdown"><a href="/blog">Blog</a><ul class="dropdown"><li><a href="/articles">Guest Articles</a></li></ul></li><li class="has-dropdown"><a href="/tarot-pull">Free Tools</a><ul class="dropdown"><li><a href="/tarot-pull">Free Tarot Pull</a></li><li><a href="/tarot-spread">Free Tarot Spread</a></li><li><a href="/life-path">Life Path Calculator</a></li><li><a href="/horoscope">Daily Horoscope</a></li></ul></li><li><a href="/shop">Shop</a></li><li><a href="/contact">Contact</a></li><li><a href="/account" class="nav-utility">My Account</a></li></ul>
+      <ul><li><a href="/meet">Meet Cherry</a></li><li class="has-dropdown"><a href="/psychic-reading">Readings</a><ul class="dropdown"><li><a href="/psychic-reading">Psychic Reading</a></li><li><a href="/tarot">Tarot Card Reading</a></li><li><a href="/book-appointment">Request a Time</a></li></ul></li><li class="has-dropdown"><a href="/numerology">Numerology</a><ul class="dropdown"><li><a href="/free-karmic-reading">Free Numerology Reading</a></li></ul></li><li class="has-dropdown"><a href="/testimonials">Reviews</a><ul class="dropdown"><li><a href="/feedback">Leave Feedback</a></li></ul></li><li class="has-dropdown"><a href="/blog">Blog</a><ul class="dropdown"><li><a href="/articles">Guest Articles</a></li></ul></li><li class="has-dropdown"><a href="/tarot-pull">Free Tools</a><ul class="dropdown"><li><a href="/tarot-pull">Free Tarot Pull</a></li><li><a href="/tarot-spread">Free Tarot Spread</a></li><li><a href="/life-path">Life Path Calculator</a></li><li><a href="/horoscope">Daily Horoscope</a></li></ul></li><li><a href="/shop">Shop</a></li><li><a href="/contact">Contact</a></li><li><a href="/account" class="nav-utility cur">My Account</a></li></ul>
       <a class="btn btn-primary" href="/shop">Book a Reading</a>
     </nav>
   </div>
 </header>
 <main>
-<section class="page-hero banner"><div class="ph-glow" aria-hidden="true"></div><div class="ph-stars" aria-hidden="true"></div><div class="wrap reveal"><p class="eyebrow">Your account</p><h1>No account needed</h1><p class="lede">There's nothing to sign in to and nothing to register for. Just book or buy, and you're set.</p></div></section>
-<section class="section"><div class="wrap" style="max-width:680px">
-  <div class="card reveal" style="text-align:center">
-    <h3>Where to find your order</h3>
-    <p>Every booking and every purchase sends you a confirmation email the moment it goes through, with the details of what you got and when. That email is your record, keep it.</p>
-    <p style="color:var(--ink-soft);font-size:.9rem;margin-top:1rem">Looking for something from an older order, or don't see a confirmation you expected? <a href="/contact">Reach out to Cherry directly</a> and she'll sort it out with you personally.</p>
+<section class="page-hero banner"><div class="ph-glow" aria-hidden="true"></div><div class="ph-stars" aria-hidden="true"></div><div class="wrap reveal"><p class="eyebrow">Your account</p><h1 id="acTitle">My Account</h1><p class="lede" id="acLede">Loading…</p></div></section>
+<section class="section"><div class="wrap ac-wrap">
+
+  <div id="acLoggedOut" hidden style="text-align:center">
+    <div class="card reveal" style="max-width:480px;margin:0 auto">
+      <h3 style="margin:0 0 .6rem">Sign in to see your history</h3>
+      <p style="color:var(--ink-soft);margin:0 0 1.2rem">See every reading, minutes purchase, report, and appointment tied to your email, in one place.</p>
+      <a class="btn btn-primary" href="/login.html">Sign In</a>
+    </div>
+    <p style="color:var(--ink-soft);font-size:.9rem;margin-top:1.4rem">Prefer not to sign in? Every order and booking still emails you a confirmation, that works too. <a href="/contact">Reach out to Cherry directly</a> for anything older.</p>
   </div>
+
+  <div id="acLoggedIn" hidden>
+    <div class="ac-header">
+      <div>
+        <p style="margin:0;font-weight:600;color:var(--oxblood)" id="acName"></p>
+        <p style="margin:0;font-size:.85rem;color:var(--ink-soft)" id="acEmail"></p>
+      </div>
+      <button class="btn btn-ghost" id="acSignOut" type="button">Sign Out</button>
+    </div>
+
+    <h3>Appointments</h3>
+    <div class="ac-list" id="acAppts"><p class="ac-empty">Loading…</p></div>
+
+    <h3>Orders</h3>
+    <div class="ac-list" id="acOrders"><p class="ac-empty">Loading…</p></div>
+  </div>
+
 </div></section><section class="section section-dark cta" id="book"><div class="wrap reveal"><h2>Ready for clarity?</h2><p>Your first step is a quiet one. Book your reading and let the answers you're seeking find their way to you.</p><a class="btn btn-gold" href="/shop">Book a Reading</a></div></section>
 </main>
 <footer class="footer">
@@ -66,11 +97,92 @@
   <span class="cw-status"><span class="status-dot"></span>Cherry is Online</span>
   <span class="cw-bubble"><img src="assets/mark-clean.png" alt=""></span>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="app.js?v=9"></script>
 <script src="embers.js?v=4"></script>
 <script src="magic.js?v=2"></script>
 <script src="funnel.js?v=8"></script>
 <script src="chat.js?v=7"></script>
 <script src="status.js?v=1"></script>
+<script>
+(function(){
+  var SUPABASE_URL='https://ctoeuikxoqlhnebgsygp.supabase.co';
+  var SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN0b2V1aWt4b3FsaG5lYmdzeWdwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA0ODM4NTMsImV4cCI6MjA5NjA1OTg1M30.Cy0uf8hm-Biea7a1V3bLQBz70f1oyhP83vHDjefTce8';
+  var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON, {db:{schema:'cherry_sage'}});
+  function money(cents){ return '$'+((cents||0)/100).toFixed(2); }
+  function fmtDate(iso){ if(!iso) return ''; var d=new Date(iso); return d.toLocaleDateString(undefined,{year:'numeric',month:'short',day:'numeric'}); }
+  function esc(s){ return String(s||'').replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function pillLabel(s){ return ({paid:'Paid', pending_approval:'Pending', approved:'Confirmed', declined:'Declined', alternate_offered:'Alternate offered', cancelled:'Cancelled'})[s] || s; }
+
+  sb.auth.getSession().then(function(res){
+    var session = res.data && res.data.session;
+    if(!session){
+      document.getElementById('acLoggedOut').hidden=false;
+      document.getElementById('acLede').textContent='See your order and appointment history in one place.';
+      return;
+    }
+    showAccount(session);
+  });
+
+  function showAccount(session){
+    document.getElementById('acLoggedIn').hidden=false;
+    document.getElementById('acTitle').textContent='Welcome back';
+    document.getElementById('acLede').textContent='Here is everything tied to your account.';
+    document.getElementById('acEmail').textContent=session.user.email;
+
+    sb.rpc('link_customer_to_auth_user').then(function(res){
+      if(res.error || !res.data){
+        document.getElementById('acAppts').innerHTML='<p class="ac-empty" style="color:var(--cherry)">Could not load your account, please refresh.</p>';
+        document.getElementById('acOrders').innerHTML='';
+        return;
+      }
+      var customerId = res.data;
+
+      sb.from('customers').select('full_name').eq('id', customerId).maybeSingle().then(function(r){
+        document.getElementById('acName').textContent = (r.data && r.data.full_name) || session.user.email;
+      });
+
+      sb.from('appointments').select('id,requested_start,status,decision_note').eq('customer_id', customerId).order('requested_start',{ascending:false}).then(function(r){
+        var box=document.getElementById('acAppts');
+        var rows=r.data||[];
+        if(!rows.length){ box.innerHTML='<p class="ac-empty">No appointments yet.</p>'; return; }
+        box.innerHTML=rows.map(function(a){
+          return '<div class="ac-row"><div><div class="ac-row-name">'+fmtDate(a.requested_start)+
+            '<span class="ac-pill '+esc(a.status)+'">'+esc(pillLabel(a.status))+'</span></div>'+
+            (a.decision_note?'<div class="ac-row-sub">'+esc(a.decision_note)+'</div>':'')+'</div></div>';
+        }).join('');
+      });
+
+      Promise.all([
+        sb.from('orders').select('id,amount_cents,status,created_at,reading_products(name)').eq('customer_id', customerId),
+        sb.from('cart_orders').select('id,amount_cents,status,created_at,cart_order_items(reading_products(name))').eq('customer_id', customerId),
+      ]).then(function(results){
+        var singleOrders = (results[0].data||[]).map(function(o){
+          return {id:o.id, amount_cents:o.amount_cents, status:o.status, created_at:o.created_at,
+            name: (o.reading_products && o.reading_products.name) || 'Order'};
+        });
+        var cartOrders = (results[1].data||[]).map(function(o){
+          var names = (o.cart_order_items||[]).map(function(i){ return i.reading_products && i.reading_products.name; }).filter(Boolean);
+          return {id:o.id, amount_cents:o.amount_cents, status:o.status, created_at:o.created_at,
+            name: names.length ? names.join(', ') : (o.cart_order_items||[]).length+' item order'};
+        });
+        var all = singleOrders.concat(cartOrders).sort(function(a,b){ return new Date(b.created_at)-new Date(a.created_at); });
+        var box=document.getElementById('acOrders');
+        if(!all.length){ box.innerHTML='<p class="ac-empty">No orders yet.</p>'; return; }
+        box.innerHTML=all.map(function(o){
+          return '<div class="ac-row"><div><div class="ac-row-name">'+esc(o.name)+
+            '<span class="ac-pill '+esc(o.status)+'">'+esc(pillLabel(o.status))+'</span></div>'+
+            '<div class="ac-row-sub">'+fmtDate(o.created_at)+'</div></div>'+
+            '<div class="ac-row-price">'+money(o.amount_cents)+'</div></div>';
+        }).join('');
+      });
+    });
+  }
+
+  document.getElementById('acSignOut').addEventListener('click', function(){
+    sb.auth.signOut().then(function(){ location.href='/account.html'; });
+  });
+})();
+</script>
 </body>
 </html>
