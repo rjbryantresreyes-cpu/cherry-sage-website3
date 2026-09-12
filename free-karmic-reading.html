@@ -58,7 +58,6 @@
 </div></section>
 <script>
 (function(){
-  var MEANINGS={1:"Independence, leadership, and fresh starts. A path of standing on your own and beginning things.",2:"Partnership, balance, and sensitivity. A path of connection, diplomacy, and working with others.",3:"Expression, creativity, and joy. A path of communication, art, and lifting others up.",4:"Structure, discipline, and steady effort. A path of building something lasting, brick by brick.",5:"Freedom, change, and adventure. A path of movement, curiosity, and living fully.",6:"Love, responsibility, and nurturing. A path of home, family, and caring deeply for others.",7:"Wisdom, reflection, and the seeker. A path of inner knowing, study, and spiritual depth.",8:"Power, ambition, and mastery. A path of achievement, leadership, and material balance.",9:"Compassion, completion, and the humanitarian. A path of giving, letting go, and serving the greater good.",11:"The intuitive master number. Heightened insight, inspiration, and a spiritual calling.",22:"The master builder. The vision of 11 made real in the world, big dreams brought to form.",33:"The master teacher. Love, healing, and devotion in service to others."};
   var MAP={a:1,j:1,s:1,b:2,k:2,t:2,c:3,l:3,u:3,d:4,m:4,v:4,e:5,n:5,w:5,f:6,o:6,x:6,g:7,p:7,y:7,h:8,q:8,z:8,i:9,r:9};
   function reduce(n){var master=[11,22,33];while(n>9&&master.indexOf(n)<0){n=(''+n).split('').reduce(function(a,b){return a+ +b;},0);}return n;}
   var f=document.getElementById('karmicForm'),out=document.getElementById('karmicResult'),note=document.getElementById('karmicNote');
@@ -67,14 +66,20 @@
     var letters=name.toLowerCase().replace(/[^a-z]/g,'');
     if(letters.length<2){note.hidden=false;note.textContent='Please enter your full name.';return;}
     note.hidden=true;
-    var total=0;for(var i=0;i<letters.length;i++){total+=MAP[letters[i]]||0;}
+    // Karmic Accumulation is the sum of the numbers 1-9 that are MISSING from your name's
+    // letters, not the sum of every letter present (fixed 2026-09-12, per Cherry's correction).
+    var present={};
+    for(var i=0;i<letters.length;i++){var v=MAP[letters[i]];if(v)present[v]=true;}
+    var missing=[];
+    for(var d=1;d<=9;d++){if(!present[d])missing.push(d);}
+    var total=missing.reduce(function(a,b){return a+b;},0);
     var red=reduce(total);
     out.hidden=false;
     out.innerHTML='<div class="card reveal" style="text-align:center;border-color:var(--gold)">'+
       '<p class="eyebrow">Your Karmic Accumulation</p>'+
       '<div style="font-family:var(--font-display);font-size:3.4rem;color:var(--oxblood);line-height:1">'+total+'</div>'+
-      '<p style="color:var(--ink-soft);margin:.3rem 0 0">reduces to <strong style="color:var(--cherry)">'+red+'</strong></p>'+'<p style="max-width:48ch;margin:.9rem auto 0;font-weight:600;color:var(--oxblood)">'+(MEANINGS[red]||'')+'</p>'+
-      '<p style="max-width:52ch;margin:1rem auto 0">Your Karmic Accumulation is the sum of every letter in your birth name, the energy you have carried and gathered across this lifetime. The number itself is only the doorway. What it means for <em>you</em>, and how it is shaping your path right now, is what Cherry reads with you, one to one.</p>'+
+      '<p style="color:var(--ink-soft);margin:.3rem 0 0">reduces to <strong style="color:var(--cherry)">'+red+'</strong></p>'+
+      '<p style="max-width:52ch;margin:1rem auto 0">Your Karmic Accumulation is the sum of the numbers missing from your birth name'+(missing.length?' ('+missing.join(', ')+')':'')+', the karmic lessons you carry into this lifetime. What this number means for <em>you</em>, in the detail Cherry actually gives it, is what she reads with you, one to one.</p>'+
       '<a class="btn btn-gold" href="/shop.html" style="margin-top:1.2rem">Explore your number with Cherry</a>'+
       (window.CSFunnel?window.CSFunnel.optinHTML('karmic',''):'')+
     '</div>';
